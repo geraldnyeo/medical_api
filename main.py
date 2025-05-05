@@ -63,7 +63,7 @@ class Record(BaseModel):
 
 @app.post("/upload")
 def upload_clinical_record(record: Record):
-    print(record)
+    return record
 
 class Patient(BaseModel):
     patientID: int
@@ -78,7 +78,7 @@ class Patient(BaseModel):
 
 @app.post("/patient")
 def create_new_patient(patient: Patient):
-    print(patient)
+    return patient
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
