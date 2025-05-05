@@ -59,11 +59,12 @@ class Record(BaseModel):
 def upload_clinical_record(record: Record):
     try:
         record_dict = record.dict(by_alias=True)
-        res = db["clinical_records"].insert_one(record_dict)
+        record_dict["rawText"] = record_dict.pop("text")
+        db["clinical_records"].insert_one(record_dict)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to create clinical record.")
 
-    return "Post Request Received"
+    return "Patient record uploaded"
 
 class Patient(BaseModel):
     patientID: int
