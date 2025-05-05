@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -55,9 +55,15 @@ class Record(BaseModel):
     reason: str
     text: str
 
-@app.post("/upload")
+@app.post("/upload", status_code=status.HTTP_201_CREATED)
 def upload_clinical_record(record: Record):
-    return record
+    try:
+        record_dict = record.dict(by_alias=True)
+        res = db["clinical_records"].insert_one(record_dict)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to create clinical record.")
+
+    return "Post Request Received"
 
 class Patient(BaseModel):
     patientID: int
