@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from pydantic import BaseModel
@@ -24,7 +24,8 @@ async def root():
 
 @app.get("/patient")
 async def retrieve_patient_data(id: int):
-    print(id)
+    if id != 0:
+        raise HTTPException(status_code=404, detail="Patient ID not found.")
 
     data = {
         "patientID": id,
