@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -10,7 +11,7 @@ async def root():
     }
 
 @app.get("/patient")
-async def get_patient_details(id: int):
+async def retrieve_patient_data(id: int):
     print(id)
 
     data = {
@@ -54,6 +55,30 @@ async def get_patient_details(id: int):
     }
 
     return data
+
+class Record(BaseModel):
+    patientID: int
+    reason: str
+    text: str
+
+@app.post("/upload")
+def upload_clinical_record(record: Record):
+    print(record)
+
+class Patient(BaseModel):
+    patientID: int
+    name: str
+    age: str
+    gender: str
+    ethnicity: str
+    serviceType: str
+    rank: str
+    pes: str
+    vocation: str
+
+@app.post("/patient")
+def create_new_patient(patient: Patient):
+    print(patient)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
