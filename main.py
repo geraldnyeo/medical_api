@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from pymongo.mongo_client import MongoClient
+from pymongo import MongoClient
 
 # Connect to MongoDB
 MONGO_PASSWORD = "m8pWxZ4g5W7p7Edd"
@@ -34,16 +34,18 @@ async def root():
 async def retrieve_patient_data(id: int):
     # if id != 0:
     #     raise HTTPException(status_code=404, detail="Patient ID not found.")
-    patient_data = db["patient_data"].find({
+    patient_data = db["patient_data"].find_one({
         "patientID": id
     })
+    patient_data = {k: v for k, v in patient_data.items() if k != "_id"}
     patient_notes = db["clinical_records"].find({
         "patientID": id
     })
+    patient_notes = [{k: v for k, v in entry.items() if k != "_id"} for entry in patient_notes]
 
     patient_records = {
         **patient_data,
-        **patient_notes,
+        "history": patient_notes
     }
 
     return patient_records
