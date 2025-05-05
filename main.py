@@ -1,13 +1,21 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-
 from pydantic import BaseModel
 
+from pymongo.mongo_client import MongoClient
+
+# Connect to MongoDB
+MONGO_PASSWORD = "m8pWxZ4g5W7p7Edd"
+DATABASE_NAME = "patient_records"
+uri = f"mongodb+srv://geraldnyeo:{MONGO_PASSWORD}@medical-notes-analysis.nziqawg.mongodb.net/?retryWrites=true&w=majority&appName=Medical-Notes-Analysis"
+client= MongoClient(uri)
+db = client[DATABASE_NAME]
+
+# FastAPI
 app = FastAPI()
 
 origins = ["*"]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -24,50 +32,21 @@ async def root():
 
 @app.get("/patient")
 async def retrieve_patient_data(id: int):
-    if id != 0:
-        raise HTTPException(status_code=404, detail="Patient ID not found.")
+    # if id != 0:
+    #     raise HTTPException(status_code=404, detail="Patient ID not found.")
+    patient_data = db["patient_data"].find({
+        "patientID": id
+    })
+    patient_notes = db["clinical_records"].find({
+        "patientID": id
+    })
 
-    data = {
-        "patientID": id,
-        "name": "Amy Tan",
-        "age": 20,
-        "gender": "Female",
-        "ethnicity": "Chinese",
-        "serviceType": "Regular",
-        "rank": "CFC",
-        "pes": "E9",
-        "vocation": "Supply Assistant",
-        "reason": "ORD FFI (Dental)",
-        "rawText": "Routine dental check completed without X-rays. No active dental pathology, caries, or signs of acute infection detected.",
-        "data": {
-            "tokens": [
-                "Routine",
-                "dental",
-                "check",
-                "completed",
-                "without",
-                "X-rays",
-                ".",
-                "No",
-                "active",
-                "dental",
-                "pathology",
-                ",",
-                "caries",
-                ",",
-                "or",
-                "signs",
-                "of",
-                "acute",
-                "infection",
-                "detected",
-                "."
-            ],
-            "labels": [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1]
-        }
+    patient_records = {
+        **patient_data,
+        **patient_notes,
     }
 
-    return data
+    return patient_records
 
 class Record(BaseModel):
     patientID: int
