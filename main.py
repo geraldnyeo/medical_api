@@ -77,9 +77,23 @@ class Patient(BaseModel):
     pes: str
     vocation: str
 
-@app.post("/patient")
+@app.post("/patient", status_code=status.HTTP_201_CREATED)
 def create_new_patient(patient: Patient):
-    return patient
+    patient_dict = patient.dict(by_alias=True)    
+    id = patient_dict["patientID"]
+
+    d = db["patient_data"].find_one({ 
+        "patientID": id 
+    })
+    if d != None:
+        raise HTTPException(status_code=500, detail="Failed to create patient record.")
+
+    try:    
+        db["patient_data"].insert_one(patient_dict)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to create patient record.")
+    
+    return "Clinical record uploaded"
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
