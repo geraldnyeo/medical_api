@@ -5,6 +5,8 @@ from pydantic import BaseModel
 
 from pymongo import MongoClient
 
+from medical_annotation import annotate_llm
+
 # Connect to MongoDB
 MONGO_PASSWORD = "m8pWxZ4g5W7p7Edd"
 DATABASE_NAME = "patient_records"
@@ -88,6 +90,13 @@ def upload_clinical_record(record: Record):
     try:
         record_dict = record.dict(by_alias=True)
         record_dict["rawText"] = record_dict.pop("text")
+
+        tokens, labels = annotate_llm(record_dict["rawtext"])
+        record_dict["data"] = {
+            "tokens": tokens,
+            "labels": labels
+        }
+
         db["clinical_records"].insert_one(record_dict)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to create clinical record.")
