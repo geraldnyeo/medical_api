@@ -15,7 +15,8 @@ db = client[DATABASE_NAME]
 # FastAPI
 app = FastAPI()
 
-origins = ["*"]
+# CORS
+origins = ["*"] # enable all
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -24,6 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# PATHS
 @app.get("/")
 async def root():
     return {
@@ -31,22 +33,48 @@ async def root():
     }
 
 @app.get("/patient")
-async def retrieve_patient_data(id: int):
-    # if id != 0:
-    #     raise HTTPException(status_code=404, detail="Patient ID not found.")
-    patient_data = db["patient_data"].find_one({
-        "patientID": id
-    })
-    patient_data = {k: v for k, v in patient_data.items() if k != "_id"}
-    patient_notes = db["clinical_records"].find({
-        "patientID": id
-    })
-    patient_notes = [{k: v for k, v in entry.items() if k != "_id"} for entry in patient_notes]
+async def retrieve_patient_data(
+    id: int | None = None, 
+    name: str | None = None, 
+    hist: int = 1):
+    """
+    Retrieves patient details and all associated clinical notes
+    """
+    if id != None:
+        try:
+            patient_data = db["patient_data"].find_one({
+                "patientID": id
+            })
+            patient_data = {k: v for k, v in patient_data.items() if k != "_id"}
+        except Exception as e:
+            raise HTTPException(status_code=404, detail="Patient ID not found.")
+    elif name != None:
+        try:
+            patient_data = db["patient_data"].find_one({
+                "name": name
+            })
+            id = patient_data["patientID"]
+            patient_data = {k: v for k, v in patient_data.items() if k != "_id"}
+        except Exception as e:
+            raise HTTPException(status_code=404, detail="Patient name not found.")
+    else:
+        raise HTTPException(status_code=404, detail="No name or ID provided.")
+    
+    if hist != 0:
+        try:
+            patient_notes = db["clinical_records"].find({
+                "patientID": id
+            })
+            patient_notes = [{k: v for k, v in entry.items() if k != "_id" and k != "patientID"} for entry in patient_notes]
 
-    patient_records = {
-        **patient_data,
-        "history": patient_notes
-    }
+            patient_records = {
+                **patient_data,
+                "history": patient_notes
+            }
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Unable to fetch data from database.")
+    else:
+        patient_records = patient_data
 
     return patient_records
 
