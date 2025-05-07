@@ -91,7 +91,7 @@ def upload_clinical_record(record: Record):
         record_dict = record.dict(by_alias=True)
         record_dict["rawText"] = record_dict.pop("text")
 
-        tokens, labels = annotate_llm(record_dict["rawtext"])
+        tokens, labels = annotate_llm(record_dict["rawText"])
         record_dict["data"] = {
             "tokens": tokens,
             "labels": labels
