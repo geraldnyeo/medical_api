@@ -36,7 +36,7 @@ async def root():
 
 @app.get("/patient")
 async def retrieve_patient_data(
-    id: int | None = None, 
+    id: str | None = None, 
     name: str | None = None, 
     hist: int = 1):
     """
@@ -81,7 +81,7 @@ async def retrieve_patient_data(
     return patient_records
 
 class Record(BaseModel):
-    patientID: int
+    patientID: str
     reason: str
     text: str
 
@@ -104,7 +104,7 @@ def upload_clinical_record(record: Record):
     return "Patient record uploaded"
 
 class Patient(BaseModel):
-    patientID: int
+    patientID: str
     name: str
     age: str
     gender: str
