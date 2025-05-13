@@ -91,7 +91,19 @@ def upload_clinical_record(record: Record):
         record_dict = record.dict(by_alias=True)
         record_dict["rawText"] = record_dict.pop("text")
 
-        tokens, labels = annotate_llm(record_dict["rawText"])
+        annotation_modes = {
+            "ORD FFI (Dental)": "ffi_dental",
+            "ORD FFI (Medical)": "ffi_medical",
+            "PES Review (Upgrade)": "pes_upgrade",
+            "PES Review (Downgrade)": "pes_downgrade",
+            "Report Sick": "sick"
+        }
+        if record_dict["reason"] in annotation_modes.keys():
+            annotation_mode = annotation_modes[record_dict["reason"]]
+        else:
+            annotation_mode = "append"
+        tokens, labels = annotate_llm(record_dict["rawText"],
+                                      mode = annotation_mode)
         record_dict["data"] = {
             "tokens": tokens,
             "labels": labels
