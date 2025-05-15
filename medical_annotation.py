@@ -9,10 +9,7 @@ This module has two possible methods for annotating medical notes:
 import os
 
 import nltk
-# nltk.download('punkt_tab')
-# nltk.download('averaged_perceptron_tagger_eng')
 from nltk.tokenize import word_tokenize
-from nltk import pos_tag
 
 from langchain_deepseek import ChatDeepSeek
 
@@ -41,7 +38,6 @@ def annotate_llm(text,
         max_tokens=None,
         api_key=deepseek_api_key
     )
-    print("HELLO")
 
     if mode == "direct":
         # Invoke LLM
@@ -72,15 +68,14 @@ def annotate_llm(text,
             ("system", llm_prompt),
             ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
         ]
-        print('hello!2')
         result = llm.invoke(messages)
-        print(result.content)
 
         tokens, labels = [], []
         new = True
         wait = False
         markers = ["X-SYM", "X-SYM-X", "X-HIS", "X-HIS-X", "X-DIA", "X-TRT"]
         for t in word_tokenize(result.content):
+            print(t)
             if t in markers and new:
                 labels[-1] = f"B-{t[2:]}"
                 new = False
@@ -103,7 +98,6 @@ def annotate_llm(text,
             ("system", llm_prompt),
             ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
         ]
-        print('hello!3')
         result = llm.invoke(messages)
 
         tokens, labels = [], []
