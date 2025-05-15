@@ -6,19 +6,19 @@ This module has two possible methods for annotating medical notes:
  - Using a trained NER model to label medical notes.
 """
 # Imports
-import os
-
-import nltk
-from nltk.tokenize import word_tokenize
+import re
 
 from langchain_deepseek import ChatDeepSeek
 
 # Configuration
 deepseek_api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-nltk.data.path.append(os.path.join(current_dir, "nltk_data"))
-nltk.data.path.append("./nltk_data")
+# Substitution for NLTK word tokenize
+def word_tokenize(text):
+    text = re.sub(r'([.,!?;:])(\S)', r'\1 \2', text)
+    text = re.sub(r'(\S)([.,!?;:])', r'\1 \2', text)
+    # Split by whitespace
+    return text.split()
 
 # Annotate single text using deepseek
 def annotate_llm(text, 
@@ -36,9 +36,6 @@ def annotate_llm(text,
     tokens: list
     labels: list
     """
-    print(nltk.data.find("tokenizers/punkt"))
-    print(word_tokenize("test sentence."))
-
     llm = ChatDeepSeek(
         model="deepseek-chat",
         # temperature=0,
@@ -81,8 +78,7 @@ def annotate_llm(text,
         new = True
         wait = False
         markers = ["X-SYM", "X-SYM-X", "X-HIS", "X-HIS-X", "X-DIA", "X-TRT"]
-        # for t in word_tokenize(result.content):
-        for t in result.content.split():
+        for t in word_tokenize(result.content):
             if t in markers and new:
                 labels[-1] = f"B-{t[2:]}"
                 new = False
@@ -111,8 +107,7 @@ def annotate_llm(text,
         new = True
         wait = False
         markers = ["X-SYM", "X-SYM-X", "X-HIS", "X-HIS-X", "X-DIA", "X-TRT"]
-        # for t in word_tokenize(result.content):
-        for t in result.content.split():
+        for t in word_tokenize(result.content):
             if t in markers and new:
                 labels[-1] = f"B-{t[2:]}"
                 new = False
