@@ -19,6 +19,13 @@ from langchain_deepseek import ChatDeepSeek
 # Configuration
 deepseek_api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
 
+llm = ChatDeepSeek(
+    model="deepseek-chat",
+    # temperature=0,
+    max_tokens=None,
+    api_key=deepseek_api_key
+)
+
 # Annotate single text using deepseek
 def annotate_llm(text, 
                  mode="append"):
@@ -35,15 +42,6 @@ def annotate_llm(text,
     tokens: list
     labels: list
     """
-    # Configure LLM
-    print("HLLOOOOO")
-    llm = ChatDeepSeek(
-        model="deepseek-chat",
-        # temperature=0,
-        max_tokens=None,
-        api_key=deepseek_api_key
-    )
-
     if mode == "direct":
         # Invoke LLM
         llm_prompt = open(f"./prompts/llm_prompt_{mode}.txt").read()
@@ -98,7 +96,6 @@ def annotate_llm(text,
     else:
         # Invoke LLM
         llm_prompt = open(f"./prompts/llm_prompt_{mode}.txt").read()
-        print(llm_prompt)
         messages = [
             ("system", llm_prompt),
             ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
