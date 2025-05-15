@@ -7,14 +7,7 @@ from pymongo import MongoClient
 
 from langchain_deepseek import ChatDeepSeek
 
-llm = ChatDeepSeek(
-    model = "deepseek-chat",
-    max_tokens = None,
-    api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
-)
-print(llm)
-
-# from medical_annotation import annotate_llm
+from medical_annotation import annotate_llm
 
 # Connect to MongoDB
 MONGO_PASSWORD = "m8pWxZ4g5W7p7Edd"
@@ -112,12 +105,26 @@ def upload_clinical_record(record: Record):
         else:
             annotation_mode = "append"
 
+        deepseek_api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
+
+        llm = ChatDeepSeek(
+            model = "deepseek-chat",
+            max_tokens = None,
+            api_key = deepseek_api_key
+        )
+        llm_prompt = open(f"./prompts/llm_prompt_{annotation_mode}.txt").read()
+        messages = [
+            ("system", llm_prompt),
+            ("human", f"Unlabelled Text:\n{record_dict["rawText"]}\nLabelled Text:\n")
+        ]
+        print(llm_prompt)
+        result = llm.invoke(messages)
+        print(result)
         
         # tokens, labels = annotate_llm(record_dict["rawText"],
         #                               mode = annotation_mode)        
 
-        res = llm.invoke("JA? HELLO?")
-        print(res.content)
+        # res = llm.invoke("JA? HELLO?")
 
         tokens = ["a"]
         labels = ["O"]
