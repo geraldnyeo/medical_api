@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from pymongo import MongoClient
 
+import nltk
 from langchain_deepseek import ChatDeepSeek
 
 from medical_annotation import annotate_llm
@@ -28,6 +29,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# STARTUP
+@app.on_event("startup")
+async def download_nltk_data():
+    nltk.download('punkt')
 
 # PATHS
 @app.get("/")

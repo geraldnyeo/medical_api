@@ -8,6 +8,5 @@
     ],
     "env": {
       "APP_MODULE": "main:app"
-    },
-    "buildCommand": "python nltk_setup.py"
+    }
   }
