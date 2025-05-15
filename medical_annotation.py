@@ -95,8 +95,12 @@ def annotate_llm(text,
         return tokens, labels
     
     else:
+        print("Hello??????????????????????")
+
         # Invoke LLM
         llm_prompt = open(f"./prompts/llm_prompt_{mode}.txt").read()
+
+        print(llm_prompt)
         messages = [
             ("system", llm_prompt),
             ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
