@@ -9,7 +9,6 @@ This module has two possible methods for annotating medical notes:
 import os
 
 import nltk
-nltk.download('punkt')
 from nltk.tokenize import word_tokenize
 
 from langchain_deepseek import ChatDeepSeek
