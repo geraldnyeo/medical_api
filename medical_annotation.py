@@ -75,7 +75,6 @@ def annotate_llm(text,
         wait = False
         markers = ["X-SYM", "X-SYM-X", "X-HIS", "X-HIS-X", "X-DIA", "X-TRT"]
         for t in word_tokenize(result.content):
-            print(t)
             if t in markers and new:
                 labels[-1] = f"B-{t[2:]}"
                 new = False
@@ -104,7 +103,9 @@ def annotate_llm(text,
         new = True
         wait = False
         markers = ["X-SYM", "X-SYM-X", "X-HIS", "X-HIS-X", "X-DIA", "X-TRT"]
+        print("here")
         for t in word_tokenize(result.content):
+            print(t)
             if t in markers and new:
                 labels[-1] = f"B-{t[2:]}"
                 new = False

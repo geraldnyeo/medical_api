@@ -104,7 +104,6 @@ def upload_clinical_record(record: Record):
             annotation_mode = annotation_modes[record_dict["reason"]]
         else:
             annotation_mode = "append"
-        print(record_dict["reason"], annotation_mode)
         
         tokens, labels = annotate_llm(record_dict["rawText"],
                                       mode = annotation_mode)        
