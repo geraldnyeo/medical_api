@@ -41,7 +41,8 @@ def annotate_llm(text,
         max_tokens=None,
         api_key=deepseek_api_key
     )
-    
+    print("HELLO")
+
     if mode == "direct":
         # Invoke LLM
         llm_prompt = open(f"./prompts/llm_prompt_{mode}.txt").read()
@@ -71,7 +72,9 @@ def annotate_llm(text,
             ("system", llm_prompt),
             ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
         ]
+        print('hello!2')
         result = llm.invoke(messages)
+        print(result.content)
 
         tokens, labels = [], []
         new = True
@@ -100,6 +103,7 @@ def annotate_llm(text,
             ("system", llm_prompt),
             ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
         ]
+        print('hello!3')
         result = llm.invoke(messages)
 
         tokens, labels = [], []

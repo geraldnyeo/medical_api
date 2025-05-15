@@ -104,27 +104,10 @@ def upload_clinical_record(record: Record):
             annotation_mode = annotation_modes[record_dict["reason"]]
         else:
             annotation_mode = "append"
-
-        deepseek_api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
-
-        llm = ChatDeepSeek(
-            model = "deepseek-chat",
-            max_tokens = None,
-            api_key = deepseek_api_key
-        )
-        llm_prompt = open(f"./prompts/llm_prompt_{annotation_mode}.txt").read()
-        messages = [
-            ("system", llm_prompt),
-            ("human", f"Unlabelled Text:\n{record_dict["rawText"]}\nLabelled Text:\n")
-        ]
-        print(llm_prompt)
-        result = llm.invoke(messages)
-        print(result)
+        print(record_dict["reason"], annotation_mode)
         
-        # tokens, labels = annotate_llm(record_dict["rawText"],
-        #                               mode = annotation_mode)        
-
-        # res = llm.invoke("JA? HELLO?")
+        tokens, labels = annotate_llm(record_dict["rawText"],
+                                      mode = annotation_mode)        
 
         tokens = ["a"]
         labels = ["O"]
