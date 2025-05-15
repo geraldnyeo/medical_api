@@ -32,6 +32,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# STARTUP
+@app.on_event("startup")
+async def download_nltk_data():
+    print("HELLO STARTING UP!")
+    nltk.download("punkt")
+    print(nltk.data.find('tokenizers'))
+
+
 # PATHS
 @app.get("/")
 async def root():
@@ -111,6 +119,7 @@ def upload_clinical_record(record: Record):
         #     annotation_mode = "append"
         annotation_mode = "append"
 
+        print(nltk.data.find('tokenizers'))
         print(word_tokenize('why isn"t this fking working'))
 
         tokens, labels = annotate_llm(record_dict["rawText"],
