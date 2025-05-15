@@ -9,6 +9,7 @@ This module has two possible methods for annotating medical notes:
 import os
 
 import nltk
+nltk.download('punkt_tab')
 from nltk.tokenize import word_tokenize
 
 from langchain_deepseek import ChatDeepSeek
@@ -104,6 +105,7 @@ def annotate_llm(text,
         wait = False
         markers = ["X-SYM", "X-SYM-X", "X-HIS", "X-HIS-X", "X-DIA", "X-TRT"]
         print("here")
+        print(word_tokenize(result.content))
         for t in word_tokenize(result.content):
             print(t)
             if t in markers and new:
