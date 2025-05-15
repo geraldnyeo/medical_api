@@ -89,6 +89,7 @@ async def retrieve_patient_data(
     return patient_records
 
 class Record(BaseModel):
+    recordID: str
     patientID: str
     reason: str
     text: str
@@ -106,13 +107,15 @@ def upload_clinical_record(record: Record):
             "PES Review (Downgrade)": "pes_downgrade",
             "Report Sick": "sick"
         }
-        if record_dict["reason"] in annotation_modes.keys():
-            annotation_mode = annotation_modes[record_dict["reason"]]
-        else:
-            annotation_mode = "append"
-        
+        # TODO: FIX THIS
+        # if record_dict["reason"] in annotation_modes.keys():
+        #     annotation_mode = annotation_modes[record_dict["reason"]]
+        # else:
+        #     annotation_mode = "append"
+        annotation_mode = "append"
+
         tokens, labels = annotate_llm(record_dict["rawText"],
-                                      mode = annotation_mode)  
+                                      mode = annotation_mode)
         record_dict["data"] = {
             "tokens": tokens,
             "labels": labels
