@@ -87,9 +87,12 @@ class Record(BaseModel):
 
 @app.post("/upload", status_code=status.HTTP_201_CREATED)
 def upload_clinical_record(record: Record):
+    print("bruh")
     try:        
         record_dict = record.dict(by_alias=True)
         record_dict["rawText"] = record_dict.pop("text")
+
+        print("bruh2")
 
         annotation_modes = {
             "ORD FFI (Dental)": "ffi_dental",
@@ -102,6 +105,8 @@ def upload_clinical_record(record: Record):
             annotation_mode = annotation_modes[record_dict["reason"]]
         else:
             annotation_mode = "append"
+
+        print("bruh3")
         tokens, labels = annotate_llm(record_dict["rawText"],
                                       mode = annotation_mode)
         record_dict["data"] = {
