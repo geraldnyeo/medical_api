@@ -5,7 +5,16 @@ from pydantic import BaseModel
 
 from pymongo import MongoClient
 
-from medical_annotation import annotate_llm
+from langchain_deepseek import ChatDeepSeek
+
+llm = ChatDeepSeek(
+    model = "deepseek-chat",
+    max_tokens = None,
+    api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
+)
+print(llm)
+
+# from medical_annotation import annotate_llm
 
 # Connect to MongoDB
 MONGO_PASSWORD = "m8pWxZ4g5W7p7Edd"
@@ -102,13 +111,20 @@ def upload_clinical_record(record: Record):
             annotation_mode = annotation_modes[record_dict["reason"]]
         else:
             annotation_mode = "append"
-        tokens, labels = annotate_llm(record_dict["rawText"],
-                                      mode = annotation_mode)        
+
+        
+        # tokens, labels = annotate_llm(record_dict["rawText"],
+        #                               mode = annotation_mode)        
+
+        res = llm.invoke("JA? HELLO?")
+        print(res.content)
+
+        tokens = ["a"]
+        labels = ["O"]
         record_dict["data"] = {
             "tokens": tokens,
             "labels": labels
         }
-        print(record_dict)
 
         db["clinical_records"].insert_one(record_dict)
     except Exception as e:

@@ -15,25 +15,9 @@ from nltk.tokenize import word_tokenize
 from nltk import pos_tag
 
 from langchain_deepseek import ChatDeepSeek
-from langchain_openai import ChatOpenAI
-
 
 # Configuration
-chatgpt_api_key = "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"
 deepseek_api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
-
-# llm = ChatDeepSeek(
-#     model="deepseek-chat",
-#     # temperature=0,
-#     max_tokens=None,
-#     api_key=deepseek_api_key
-# )
-
-llm = ChatOpenAI(
-    model="gpt-4o",
-    max_tokens=None,
-    api_key = chatgpt_api_key
-)
 
 # Annotate single text using deepseek
 def annotate_llm(text, 
@@ -51,6 +35,13 @@ def annotate_llm(text,
     tokens: list
     labels: list
     """
+    llm = ChatDeepSeek(
+        model="deepseek-chat",
+        # temperature=0,
+        max_tokens=None,
+        api_key=deepseek_api_key
+    )
+    
     if mode == "direct":
         # Invoke LLM
         llm_prompt = open(f"./prompts/llm_prompt_{mode}.txt").read()
