@@ -103,12 +103,12 @@ def upload_clinical_record(record: Record):
         else:
             annotation_mode = "append"
         tokens, labels = annotate_llm(record_dict["rawText"],
-                                      mode = annotation_mode)
-        print("a")
+                                      mode = annotation_mode)        
         record_dict["data"] = {
             "tokens": tokens,
             "labels": labels
         }
+        print(record_dict)
 
         db["clinical_records"].insert_one(record_dict)
     except Exception as e:
