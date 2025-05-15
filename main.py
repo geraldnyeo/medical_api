@@ -87,7 +87,7 @@ class Record(BaseModel):
 
 @app.post("/upload", status_code=status.HTTP_201_CREATED)
 def upload_clinical_record(record: Record):
-    try:
+    try:        
         record_dict = record.dict(by_alias=True)
         record_dict["rawText"] = record_dict.pop("text")
 
