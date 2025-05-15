@@ -36,96 +36,96 @@ def annotate_llm(text,
     labels: list
     """
     # Configure LLM
-    llm = ChatDeepSeek(
-        model="deepseek-chat",
-        # temperature=0,
-        max_tokens=None,
-        api_key=deepseek_api_key
-    )
+    print("HLLOOOOO")
+    return "A", "B"
+    # llm = ChatDeepSeek(
+    #     model="deepseek-chat",
+    #     # temperature=0,
+    #     max_tokens=None,
+    #     api_key=deepseek_api_key
+    # )
 
-    if mode == "direct":
-        # Invoke LLM
-        llm_prompt = open(f"./prompts/llm_prompt.txt").read()
-        messages = [
-            ("system", llm_prompt),
-            ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
-        ]
-        result = llm.invoke(messages)
+    # if mode == "direct":
+    #     # Invoke LLM
+    #     llm_prompt = open(f"./prompts/llm_prompt.txt").read()
+    #     messages = [
+    #         ("system", llm_prompt),
+    #         ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
+    #     ]
+    #     result = llm.invoke(messages)
 
-        # Process the LLM output
-        tokens, labels = [], []
-        for line in result.content.split("\n"):
-            if line == "":
-                continue
-            l = line.split()
-            t, l = l[0], l[1]
+    #     # Process the LLM output
+    #     tokens, labels = [], []
+    #     for line in result.content.split("\n"):
+    #         if line == "":
+    #             continue
+    #         l = line.split()
+    #         t, l = l[0], l[1]
             
-            tokens.append(t)
-            labels.append(l)
+    #         tokens.append(t)
+    #         labels.append(l)
         
-        return tokens, labels
+    #     return tokens, labels
     
-    elif mode == "append":
-        # Invoke LLM
-        llm_prompt = open(f"./prompts/llm_prompt_{mode}.txt").read()
-        messages = [
-            ("system", llm_prompt),
-            ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
-        ]
-        result = llm.invoke(messages)
+    # elif mode == "append":
+    #     # Invoke LLM
+    #     llm_prompt = open(f"./prompts/llm_prompt_{mode}.txt").read()
+    #     messages = [
+    #         ("system", llm_prompt),
+    #         ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
+    #     ]
+    #     result = llm.invoke(messages)
 
-        tokens, labels = [], []
-        new = True
-        wait = False
-        markers = ["X-SYM", "X-SYM-X", "X-HIS", "X-HIS-X", "X-DIA", "X-TRT"]
-        for t in word_tokenize(result.content):
-            if t in markers and new:
-                labels[-1] = f"B-{t[2:]}"
-                new = False
-                wait = True
-            elif t in markers and not new:
-                labels[-1] = f"I-{t[2:]}"
-                wait = True
-            else:
-                tokens.append(t)
-                labels.append("O")
-                if not wait: new = True
-                wait = False
+    #     tokens, labels = [], []
+    #     new = True
+    #     wait = False
+    #     markers = ["X-SYM", "X-SYM-X", "X-HIS", "X-HIS-X", "X-DIA", "X-TRT"]
+    #     for t in word_tokenize(result.content):
+    #         if t in markers and new:
+    #             labels[-1] = f"B-{t[2:]}"
+    #             new = False
+    #             wait = True
+    #         elif t in markers and not new:
+    #             labels[-1] = f"I-{t[2:]}"
+    #             wait = True
+    #         else:
+    #             tokens.append(t)
+    #             labels.append("O")
+    #             if not wait: new = True
+    #             wait = False
 
-        return tokens, labels
+    #     return tokens, labels
     
-    else:
-        print("Hello??????????????????????")
+    # else:
+    #     # Invoke LLM
+    #     llm_prompt = open(f"./prompts/llm_prompt_{mode}.txt").read()
 
-        # Invoke LLM
-        llm_prompt = open(f"./prompts/llm_prompt_{mode}.txt").read()
+    #     print(llm_prompt)
+    #     messages = [
+    #         ("system", llm_prompt),
+    #         ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
+    #     ]
+    #     result = llm.invoke(messages)
 
-        print(llm_prompt)
-        messages = [
-            ("system", llm_prompt),
-            ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
-        ]
-        result = llm.invoke(messages)
+    #     tokens, labels = [], []
+    #     new = True
+    #     wait = False
+    #     markers = ["X-SYM", "X-SYM-X", "X-HIS", "X-HIS-X", "X-DIA", "X-TRT"]
+    #     for t in word_tokenize(result.content):
+    #         if t in markers and new:
+    #             labels[-1] = f"B-{t[2:]}"
+    #             new = False
+    #             wait = True
+    #         elif t in markers and not new:
+    #             labels[-1] = f"I-{t[2:]}"
+    #             wait = True
+    #         else:
+    #             tokens.append(t)
+    #             labels.append("O")
+    #             if not wait: new = True
+    #             wait = False
 
-        tokens, labels = [], []
-        new = True
-        wait = False
-        markers = ["X-SYM", "X-SYM-X", "X-HIS", "X-HIS-X", "X-DIA", "X-TRT"]
-        for t in word_tokenize(result.content):
-            if t in markers and new:
-                labels[-1] = f"B-{t[2:]}"
-                new = False
-                wait = True
-            elif t in markers and not new:
-                labels[-1] = f"I-{t[2:]}"
-                wait = True
-            else:
-                tokens.append(t)
-                labels.append("O")
-                if not wait: new = True
-                wait = False
-
-        return tokens, labels
+    #     return tokens, labels
 
 # Annotate single text using NER model
 def annotate_ner():
