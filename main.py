@@ -5,8 +5,10 @@ from pydantic import BaseModel
 
 from pymongo import MongoClient
 
-import nltk
 from langchain_deepseek import ChatDeepSeek
+
+import nltk
+from nltk.tokenize import word_tokenize
 
 from medical_annotation import annotate_llm
 
@@ -29,11 +31,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# STARTUP
-@app.on_event("startup")
-async def download_nltk_data():
-    nltk.download('punkt')
 
 # PATHS
 @app.get("/")
@@ -113,6 +110,8 @@ def upload_clinical_record(record: Record):
         # else:
         #     annotation_mode = "append"
         annotation_mode = "append"
+
+        print(word_tokenize('why isn"t this fking working'))
 
         tokens, labels = annotate_llm(record_dict["rawText"],
                                       mode = annotation_mode)
