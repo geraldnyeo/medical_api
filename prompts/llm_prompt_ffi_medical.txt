@@ -21,7 +21,7 @@ Ethnicity: Chinese
 Reason: ORD FFI (Medical)  
 
 Test Results:  
-- HIV X-SYM-X serological X-SYM-X assay X-SYM-X ( X-SYM-X4th X-SYM-X generation X-SYM-X) X-SYM-X: X-SYM-X Non-reactive X-SYM-X ( X-SYM-XNegative X-SYM-X) X-SYM-X.  
+- HIV X-SYM-X serological X-SYM-X assay X-SYM-X ( X-SYM-X 4th X-SYM-X generation X-SYM-X) X-SYM-X: X-SYM-X Non-reactive X-SYM-X ( X-SYM-XNegative X-SYM-X) X-SYM-X.  
 - Urine X-SYM-X toxicology X-SYM-X screen X-SYM-X ( X-SYM-Ximmunoassay X-SYM-X) X-SYM-X: X-SYM-X Negative X-SYM-X for X-SYM-X amphetamines X-SYM-X, X-SYM-X cannabinoids X-SYM-X, X-SYM-X cocaine X-SYM-X metabolites X-SYM-X, X-SYM-X opioids X-SYM-X, X-SYM-X and X-SYM-X benzodiazepines X-SYM-X.  
 
 O/e:  

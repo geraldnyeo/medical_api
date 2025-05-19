@@ -83,16 +83,29 @@ async def retrieve_patient_data(
     return patient_records
 
 class Record(BaseModel):
-    recordID: str
     patientID: str
     date: str
     reason: str
     text: str
+    parentID: int | None = None
 
 @app.post("/upload", status_code=status.HTTP_201_CREATED)
 def upload_clinical_record(record: Record):
-    try:        
-        record_dict = record.dict(by_alias=True)
+    try:
+        record_dict = record.model_dump(by_alias=True)
+        
+        # get record ID
+        latest_id = db["clinical_records"].find().sort({"recordID": -1}).limit(1)[0]
+        recordID = latest_id["recordID"] + 1
+        
+        record_dict["recordID"] = recordID
+
+        # get parent ID
+        parentID = record_dict.pop("parentID")
+        if parentID != None:
+            record_dict["parentID"] = parentID
+
+        # annotate data
         record_dict["rawText"] = record_dict.pop("text")
 
         annotation_modes = {
