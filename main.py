@@ -85,6 +85,7 @@ async def retrieve_patient_data(
 class Record(BaseModel):
     recordID: str
     patientID: str
+    date: str
     reason: str
     text: str
 
