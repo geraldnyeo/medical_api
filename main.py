@@ -5,8 +5,6 @@ from pydantic import BaseModel
 
 from pymongo import MongoClient
 
-from langchain_deepseek import ChatDeepSeek
-
 from medical_annotation import annotate_llm
 
 # Connect to MongoDB
@@ -91,23 +89,26 @@ class Record(BaseModel):
 
 @app.post("/upload", status_code=status.HTTP_201_CREATED)
 def upload_clinical_record(record: Record):
+    record_dict = record.model_dump(by_alias=True)
+
+    # get parent ID
+    parentID = record_dict.pop("parentID")
+    if parentID != None:
+        record_dict["parentID"] = parentID
+
+    # get record ID
     try:
-        record_dict = record.model_dump(by_alias=True)
-        
-        # get record ID
         latest_id = db["clinical_records"].find().sort({"recordID": -1}).limit(1)[0]
         recordID = latest_id["recordID"] + 1
         
         record_dict["recordID"] = recordID
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Unable to fetch data from database.")
+        
+    record_dict["rawText"] = record_dict.pop("text")
 
-        # get parent ID
-        parentID = record_dict.pop("parentID")
-        if parentID != None:
-            record_dict["parentID"] = parentID
-
-        # annotate data
-        record_dict["rawText"] = record_dict.pop("text")
-
+    # annotate data
+    try:      
         annotation_modes = {
             "ORD FFI (Dental)": "ffi_dental",
             "ORD FFI (Medical)": "ffi_medical",
@@ -128,7 +129,10 @@ def upload_clinical_record(record: Record):
             "tokens": tokens,
             "labels": labels
         }
-
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Unable to generate labels.")
+    
+    try:
         db["clinical_records"].insert_one(record_dict)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to create clinical record.")
@@ -151,11 +155,14 @@ def create_new_patient(patient: Patient):
     patient_dict = patient.dict(by_alias=True)    
     id = patient_dict["patientID"]
 
-    d = db["patient_data"].find_one({ 
-        "patientID": id 
-    })
-    if d != None:
-        raise HTTPException(status_code=500, detail="Failed to create patient record.")
+    try:
+        d = db["patient_data"].find_one({ 
+            "patientID": id 
+        })
+        if d != None:
+            raise HTTPException(status_code=422, detail="Patient ID already exists.")
+    except:
+        raise HTTPException(status_code=500, detail="Unable to fetch data from database.")
 
     try:    
         db["patient_data"].insert_one(patient_dict)
