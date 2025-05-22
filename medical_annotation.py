@@ -8,10 +8,17 @@ This module has two possible methods for annotating medical notes:
 # Imports
 import re
 
+import sparknlp
+from sparknlp.annotator import NerDLModel
+from pyspark.sql import functions as F
+from pyspark.ml import PipelineModel
+
 from langchain_deepseek import ChatDeepSeek
 
 # Configuration
 deepseek_api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
+
+spark = sparknlp.start()
 
 # Substitution for NLTK word tokenize
 def word_tokenize(text):
@@ -125,4 +132,11 @@ def annotate_llm(text,
 
 # Annotate single text using NER model
 def annotate_ner():
-    pass
+    pipe_path = "./models/ner_pipe"
+    ner_pipe = PipelineModel.load(pipe_path)
+
+    SYM_model_path = "./models/ner_SYM_dental_52"
+    SYM_model = NerDLModel.load(SYM_model_path)
+
+    print(ner_pipe)
+    print(SYM_model)
