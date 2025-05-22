@@ -18,7 +18,7 @@ from langchain_deepseek import ChatDeepSeek
 # Configuration
 deepseek_api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
 
-spark = sparknlp.start()
+# spark = sparknlp.start()
 
 # Substitution for NLTK word tokenize
 def word_tokenize(text):

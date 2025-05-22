@@ -88,7 +88,7 @@ class Record(BaseModel):
     parentID: int | None = None
 
 @app.post("/upload", status_code=status.HTTP_201_CREATED)
-def upload_clinical_record(record: Record):
+def create_clinical_record(record: Record):
     record_dict = record.model_dump(by_alias=True)
 
     # get parent ID
@@ -170,6 +170,13 @@ def create_new_patient(patient: Patient):
         raise HTTPException(status_code=500, detail="Failed to create patient record.")
     
     return "Clinical record uploaded"
+
+@app.put("/patient", status_code=status.HTTP_200_OK)
+def update_patient_record(patient: Patient):
+    patient_dict = patient.dict(by_alias=True)
+    id = patient_dict["patientID"]
+
+    pass
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
