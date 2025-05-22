@@ -36,16 +36,16 @@ async def root():
 
 @app.get("/patient")
 async def retrieve_patient_data(
-    id: str | None = None, 
+    patientID: str | None = None, 
     name: str | None = None, 
     hist: int = 1):
     """
     Retrieves patient details and all associated clinical notes
     """
-    if id != None:
+    if patientID != None:
         try:
             patient_data = db["patient_data"].find_one({
-                "patientID": id
+                "patientID": patientID
             })
             patient_data = {k: v for k, v in patient_data.items() if k != "_id"}
         except Exception as e:
@@ -55,7 +55,7 @@ async def retrieve_patient_data(
             patient_data = db["patient_data"].find_one({
                 "name": name
             })
-            id = patient_data["patientID"]
+            patientID = patient_data["patientID"]
             patient_data = {k: v for k, v in patient_data.items() if k != "_id"}
         except Exception as e:
             raise HTTPException(status_code=404, detail="Patient name not found.")
@@ -88,7 +88,7 @@ class Record(BaseModel):
     parentID: int | None = None
 
 @app.post("/upload", status_code=status.HTTP_201_CREATED)
-def create_clinical_record(record: Record):
+def upload_clinical_record(record: Record):
     record_dict = record.model_dump(by_alias=True)
 
     # get parent ID
@@ -153,11 +153,11 @@ class Patient(BaseModel):
 @app.post("/patient", status_code=status.HTTP_201_CREATED)
 def create_new_patient(patient: Patient):
     patient_dict = patient.dict(by_alias=True)    
-    id = patient_dict["patientID"]
+    patientID = patient_dict["patientID"]
 
     try:
         d = db["patient_data"].find_one({ 
-            "patientID": id 
+            "patientID": patientID
         })
         if d != None:
             raise HTTPException(status_code=422, detail="Patient ID already exists.")
@@ -171,12 +171,30 @@ def create_new_patient(patient: Patient):
     
     return "Clinical record uploaded"
 
-@app.put("/patient", status_code=status.HTTP_200_OK)
-def update_patient_record(patient: Patient):
-    patient_dict = patient.dict(by_alias=True)
-    id = patient_dict["patientID"]
+@app.put("/patient/{patientID}", status_code=status.HTTP_200_OK)
+def update_patient_record(patientID: str, patient: Patient):
+    update_data = patient.dict(exclude_unset=True, by_alias=True)
 
-    pass
+    try:
+        db["patient_data"].update_one(
+            { "patientID": patientID },
+            { "$set": update_data }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to update patient record.")
+    
+    if "patientID" in update_data.keys():
+        if update_data["patientID"] != patientID:
+            try:
+                db["clinical_notes"].update_many(
+                    { "patientID": patientID },
+                    { "$set": { "patientID": update_data["patientID"] } }
+                )
+            except Exception as e:
+                raise HTTPException(status_code=500, detail="Failed to update clinical records.")
+
+    return "Patient record updated"
+    
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
