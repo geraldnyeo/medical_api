@@ -65,7 +65,7 @@ async def retrieve_patient_data(
     if hist != 0:
         try:
             patient_notes = db["clinical_records"].find({
-                "patientID": id
+                "patientID": patientID
             })
             patient_notes = [{k: v for k, v in entry.items() if k != "_id" and k != "patientID"} for entry in patient_notes]
 
@@ -142,7 +142,7 @@ def upload_clinical_record(record: Record):
 class Patient(BaseModel):
     patientID: str
     name: str
-    age: str
+    age: int
     gender: str
     ethnicity: str
     serviceType: str
@@ -186,7 +186,7 @@ def update_patient_record(patientID: str, patient: Patient):
     if "patientID" in update_data.keys():
         if update_data["patientID"] != patientID:
             try:
-                db["clinical_notes"].update_many(
+                db["clinical_records"].update_many(
                     { "patientID": patientID },
                     { "$set": { "patientID": update_data["patientID"] } }
                 )
