@@ -80,6 +80,63 @@ async def retrieve_patient_data(
 
     return patient_records
 
+class Patient(BaseModel):
+    patientID: str
+    name: str
+    age: int
+    gender: str
+    ethnicity: str
+    serviceType: str
+    rank: str
+    pes: str
+    vocation: str
+
+@app.post("/patient", status_code=status.HTTP_201_CREATED)
+def create_new_patient(patient: Patient):
+    patient_dict = patient.dict(by_alias=True)    
+    patientID = patient_dict["patientID"]
+
+    try:
+        d = db["patient_data"].find_one({ 
+            "patientID": patientID
+        })
+        if d != None:
+            raise HTTPException(status_code=422, detail="Patient ID already exists.")
+    except:
+        raise HTTPException(status_code=500, detail="Unable to fetch data from database.")
+
+    try:    
+        db["patient_data"].insert_one(patient_dict)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to create patient record.")
+    
+    return "Clinical record uploaded"
+
+@app.put("/patient/{patientID}", status_code=status.HTTP_200_OK)
+def update_patient_record(patientID: str, patient: Patient):
+    update_data = patient.dict(exclude_unset=True, by_alias=True)
+
+    try:
+        db["patient_data"].update_one(
+            { "patientID": patientID },
+            { "$set": update_data }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to update patient record.")
+    
+    if "patientID" in update_data.keys():
+        if update_data["patientID"] != patientID:
+            try:
+                db["clinical_records"].update_many(
+                    { "patientID": patientID },
+                    { "$set": { "patientID": update_data["patientID"] } }
+                )
+            except Exception as e:
+                raise HTTPException(status_code=500, detail="Failed to update clinical records.")
+
+    return "Patient record updated"
+
+
 class Record(BaseModel):
     patientID: str
     date: str
@@ -139,61 +196,16 @@ def upload_clinical_record(record: Record):
 
     return "Patient record uploaded"
 
-class Patient(BaseModel):
-    patientID: str
-    name: str
-    age: int
-    gender: str
-    ethnicity: str
-    serviceType: str
-    rank: str
-    pes: str
-    vocation: str
-
-@app.post("/patient", status_code=status.HTTP_201_CREATED)
-def create_new_patient(patient: Patient):
-    patient_dict = patient.dict(by_alias=True)    
-    patientID = patient_dict["patientID"]
-
+@app.delete("/record/{recordID}", status_code=status.HTTP_200_OK)
+def delete_clinical_record(recordID: int):
     try:
-        d = db["patient_data"].find_one({ 
-            "patientID": patientID
+        db["clinical_records"].delete_one({
+            "recordID": recordID
         })
-        if d != None:
-            raise HTTPException(status_code=422, detail="Patient ID already exists.")
-    except:
-        raise HTTPException(status_code=500, detail="Unable to fetch data from database.")
-
-    try:    
-        db["patient_data"].insert_one(patient_dict)
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to create patient record.")
+        raise HTTPException(status_code=500, detail="Failed to delete clinical record.")
     
-    return "Clinical record uploaded"
-
-@app.put("/patient/{patientID}", status_code=status.HTTP_200_OK)
-def update_patient_record(patientID: str, patient: Patient):
-    update_data = patient.dict(exclude_unset=True, by_alias=True)
-
-    try:
-        db["patient_data"].update_one(
-            { "patientID": patientID },
-            { "$set": update_data }
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to update patient record.")
-    
-    if "patientID" in update_data.keys():
-        if update_data["patientID"] != patientID:
-            try:
-                db["clinical_records"].update_many(
-                    { "patientID": patientID },
-                    { "$set": { "patientID": update_data["patientID"] } }
-                )
-            except Exception as e:
-                raise HTTPException(status_code=500, detail="Failed to update clinical records.")
-
-    return "Patient record updated"
+    return "Patient record deleted"
     
 
 if __name__ == "__main__":
