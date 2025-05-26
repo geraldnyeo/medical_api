@@ -243,32 +243,31 @@ def summarize_llm(text = None,
         api_key=deepseek_api_key
     )
 
-    print("before splitting")
-
     if text != None:
         if splitting_mode == "regex":
             sections = regex_splitter(text)
             print(sections)
         else:
             raise ValueError("Invalid splitting mode!")
-    
-    print("splitting passed")
 
     try:
         dt = sections["D"] + sections["T"]
-        print(dt)
     except Exception as e:
         raise KeyError("Diagnosis or Treatment section is missing.")
     
+    print("DT passed")
+    
     llm_prompt = open("./llm_prompt_summarize_dt.txt").read()
+    print(llm_prompt)
     messages = [
         ("system", llm_prompt),
         ("human", f"Summarize the following text:\n{dt}\n")
     ]
+    print(messages)
     result = llm.invoke(messages)
-    print(result)
+    print(result.content)
 
-    return result
+    return result.content
 
 
 

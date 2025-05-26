@@ -7,3 +7,4 @@ Do not include this information in your summary if it was not present in the ori
 For diagnosis, do not include medical history, only the current diagnosis.
 For treatment plans, if the plan is merely advised or recommended, indicate so.
 Use bullet points. Keep your summary as short as possible, do not include elaborations or explanations.
+Return only the summary. Do not include any additional text, such as "here is the summary".
