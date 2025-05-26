@@ -10,6 +10,8 @@ import re
 import regex
 from Levenshtein import distance
 
+import json
+
 # import sparknlp
 # from sparknlp.annotator import NerDLModel
 # from pyspark.sql import functions as F
@@ -279,6 +281,7 @@ def summarize_llm(text = None,
             sections = regex_splitter(text)
         if splitting_mode == "llm":
             sections = llm_splitter(text)
+            sections = json.loads(sections)
         else:
             raise ValueError("Invalid splitting mode!")
         
