@@ -123,7 +123,6 @@ def llm_splitter(text):
         ("human", f"Split the following text: {text}")
     ]
     result = llm.invoke(messages)
-    print(result.content)
 
     return result.content
 
@@ -280,7 +279,6 @@ def summarize_llm(text = None,
             sections = regex_splitter(text)
         if splitting_mode == "llm":
             sections = llm_splitter(text)
-            print(sections)
         else:
             raise ValueError("Invalid splitting mode!")
 
@@ -289,12 +287,16 @@ def summarize_llm(text = None,
     except Exception as e:
         raise KeyError("Diagnosis or Treatment section is missing.")
     
+    print(dt)
+    
     llm_prompt = open("./prompts/llm_prompt_summarize_dt.txt").read()
     messages = [
         ("system", llm_prompt),
         ("human", f"Summarize the following text:\n{dt}\n")
     ]
     result = llm.invoke(messages)
+
+    print(result)
 
     return result.content
 
