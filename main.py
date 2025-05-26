@@ -191,7 +191,7 @@ def upload_clinical_record(record: Record):
     
     # summarize text
     try:
-        summary = summarize_llm(record_dict["rawText"],
+        summary = summarize_llm(text = record_dict["rawText"],
                                 splitting_mode = "regex")
         print(summary)
         record_dict["summary"] = summary
