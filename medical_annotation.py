@@ -74,7 +74,6 @@ def regex_splitter(text, headers=headers, group=True):
 
   # Capture sections from text
   section_list = regex.findall(r, text)
-  print(section_list)
 
   # Create dictionary
   sections = {}
@@ -277,12 +276,13 @@ def summarize_llm(text = None,
     if text != None:
         if splitting_mode == "regex":
             sections = regex_splitter(text)
-            print(sections)
-        if splitting_mode == "llm":
+        elif splitting_mode == "llm":
             sections = llm_splitter(text)
             print(sections)
         else:
             raise ValueError("Invalid splitting mode!")
+
+    print(sections)
 
     try:
         dt = sections["D"] + sections["T"]
