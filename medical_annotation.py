@@ -10,8 +10,6 @@ import re
 import regex
 from Levenshtein import distance
 
-import json
-
 # import sparknlp
 # from sparknlp.annotator import NerDLModel
 # from pyspark.sql import functions as F
@@ -121,6 +119,7 @@ def llm_splitter(text):
     )
 
     llm_prompt_split = open("./prompts/llm_prompt_split.txt").read()
+    print(llm_prompt_split)
     messages = [
         ("system", llm_prompt_split),
         ("human", "Split the following text: {text}")
@@ -129,9 +128,7 @@ def llm_splitter(text):
 
     split_chain = split_prompt_template | llm | JsonOutputParser()
 
-    print("HEASDASLDSALD")
-
-    result = split_chain.invoke(text)
+    result = split_chain.invoke({"text": text})
     print(result.content)
 
     return result.content
@@ -276,13 +273,6 @@ def summarize_llm(text = None,
     """
     if text == None and sections == None:
        raise ValueError("Either one of 'text' or 'sections' parameters must be set!")
-    
-    llm = ChatDeepSeek(
-        model="deepseek-chat",
-        # temperature=0,
-        max_tokens=None,
-        api_key=deepseek_api_key
-    )
 
     if text != None:
         if splitting_mode == "regex":
@@ -299,6 +289,13 @@ def summarize_llm(text = None,
         raise KeyError("Diagnosis or Treatment section is missing.")
     
     print(dt)
+
+    llm = ChatDeepSeek(
+        model="deepseek-chat",
+        # temperature=0,
+        max_tokens=None,
+        api_key=deepseek_api_key
+    )
     
     llm_prompt = open("./prompts/llm_prompt_summarize_dt.txt").read()
     messages = [
