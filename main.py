@@ -192,7 +192,7 @@ def upload_clinical_record(record: Record):
     # summarize text
     try:
         summary = summarize_llm(text = record_dict["rawText"],
-                                splitting_mode = "llm")
+                                splitting_mode = "regex")
         record_dict["summary"] = summary
     except Exception as e:
         raise HTTPException(status_code=500, detail="Unable to generate summary.")

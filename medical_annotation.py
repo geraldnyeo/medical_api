@@ -119,7 +119,6 @@ def llm_splitter(text):
     )
 
     llm_prompt_split = open("./prompts/llm_prompt_split.txt").read()
-    print(llm_prompt_split)
     messages = [
         ("system", llm_prompt_split),
         ("human", "Split the following text: {text}")
@@ -129,7 +128,7 @@ def llm_splitter(text):
     split_chain = split_prompt_template | llm | JsonOutputParser()
 
     result = split_chain.invoke({"text": text})
-    print(result.content)
+    print(result)
 
     return result.content
 
