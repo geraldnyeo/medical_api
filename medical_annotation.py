@@ -246,7 +246,6 @@ def summarize_llm(text = None,
     if text != None:
         if splitting_mode == "regex":
             sections = regex_splitter(text)
-            print(sections)
         else:
             raise ValueError("Invalid splitting mode!")
 
@@ -257,7 +256,7 @@ def summarize_llm(text = None,
     
     print("DT passed")
     
-    llm_prompt = open("./llm_prompt_summarize_dt.txt").read()
+    llm_prompt = open("./prompts/llm_prompt_summarize_dt.txt").read()
     print(llm_prompt)
     messages = [
         ("system", llm_prompt),
