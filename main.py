@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from pymongo import MongoClient
 
-from medical_annotation import annotate_llm
+from medical_annotation import annotate_llm, summarize_llm
 
 # Connect to MongoDB
 MONGO_PASSWORD = "m8pWxZ4g5W7p7Edd"
@@ -110,7 +110,7 @@ def create_new_patient(patient: Patient):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to create patient record.")
     
-    return "Clinical record uploaded"
+    return "Patient record uploaded"
 
 @app.put("/patient/{patientID}", status_code=status.HTTP_200_OK)
 def update_patient_record(patientID: str, patient: Patient):
@@ -189,12 +189,21 @@ def upload_clinical_record(record: Record):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Unable to generate labels.")
     
+    # summarize text
+    try:
+        summary = summarize_llm(record_dict["rawText"],
+                                splitting_mode = "regex")
+        print(summary)
+        record_dict["summary"] = summary
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Unable to generate summary.")
+    
     try:
         db["clinical_records"].insert_one(record_dict)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to create clinical record.")
 
-    return "Patient record uploaded"
+    return "Clinical record uploaded"
 
 @app.delete("/record/{recordID}", status_code=status.HTTP_200_OK)
 def delete_clinical_record(recordID: int):
@@ -205,7 +214,7 @@ def delete_clinical_record(recordID: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to delete clinical record.")
     
-    return "Patient record deleted"
+    return "Clinical record deleted"
     
 
 if __name__ == "__main__":

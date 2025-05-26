@@ -7,6 +7,8 @@ This module has two possible methods for annotating medical notes:
 """
 # Imports
 import re
+import regex
+from Levenshtein import distance
 
 # import sparknlp
 # from sparknlp.annotator import NerDLModel
@@ -27,6 +29,72 @@ def word_tokenize(text):
     # Split by whitespace
     return text.split()
 
+# Default headers for splitting sections
+headers = {
+    "HOPC": "C",
+    "History of Presenting Complaint": "C",
+    "Test Results": "F",
+    "On Examination": "F",
+    "O/e": "F",
+    "Imp": "D",
+    "Impression": "D",
+    "Plan": "T"
+}
+
+# Regex text section splitter
+def regex_splitter(text, headers=headers, group=True):
+  """
+  Splits a document into sections based on the headers provided, categorising each section.
+
+  Parameters
+  ----------
+  headers: dict, with items of the format
+    - header (str): section type (str)
+
+  text: str, text to split
+
+  group: bool, default True
+    - determines whether to group sections of the same type in the output
+
+  Returns
+  -------
+  sections: dict, with items of the format
+    - section type (str): text (str) (if group == True)
+    - header (str): {
+      "type": section type (str)
+      "text": section type (str)
+    } (if group == False)
+  """
+  # Construct regex
+  r_headers = [fr'(?:{h}:){{e<={len(h.split(" "))}}}' for h in headers.keys()]
+  r = r"|".join(r_headers)
+  r = fr'(?s)(({r}).*?)(?=(?:{r}|\Z))'
+
+  # Capture sections from text
+  section_list = regex.findall(r, text)
+
+  # Create dictionary
+  sections = {}
+  for s in section_list:
+    header_matched = s[1]
+    header_actual = min(headers.keys(), key=lambda x: distance(x, header_matched))
+    section_type = headers[header_actual]
+
+    if group:
+      if section_type in sections.keys():
+        sections[section_type] += s[0]
+      else:
+        sections[section_type] = s[0]
+
+    else:
+      sections[header_actual] = {
+          "type": section_type,
+          "text": s[0]
+      }
+
+  return sections
+
+
 # Annotate single text using deepseek
 def annotate_llm(text, 
                  mode="append"):
@@ -36,7 +104,7 @@ def annotate_llm(text,
     Parameters
     ----------
     text: str
-    reason: reason for visit, to select correct LLM prompt for annotation
+    reason: (str) reason for visit, to select correct LLM prompt for annotation
 
     Returns
     -------
@@ -141,3 +209,74 @@ def annotate_ner():
 
     # print(ner_pipe)
     # print(SYM_model)
+
+# Summarize single text using deepseek
+def summarize_llm(text = None,
+                  sections = None,
+                  splitting_mode = "regex"):
+    """
+    Summarizes a single note using deepseek
+
+    Parameters
+    ----------
+    text: (str) raw text of entire clinical note
+        must be set if parameter "sections" is None
+    sections: (dict) pre-split sections of clinical note, in the format:
+        { section_type: text }
+        must contain at least diagnosis (D) and treatment (T) sections
+        must be set if parameter "text" is None
+    splitting_mode: (str) "regex" or "llm", determines whether to use regex or LLM for splitting text
+        regex by default
+        # TODO: Add 'None' mode for when using LLM to summarize directly, without pre-extraction of diagnosis and treatment sections.
+    
+    Returns
+    -------
+    summary: str
+    """
+    if text == None and sections == None:
+       raise ValueError("Either one of 'text' or 'sections' parameters must be set!")
+    
+    llm = ChatDeepSeek(
+        model="deepseek-chat",
+        # temperature=0,
+        max_tokens=None,
+        api_key=deepseek_api_key
+    )
+
+    if text != None:
+        if splitting_mode == "regex":
+            sections = regex_splitter(headers, text, group=True)
+            print(sections)
+        else:
+            raise ValueError("Invalid splitting mode!")
+    
+    try:
+        dt = sections["D"] + sections["T"]
+        print(dt)
+    except Exception as e:
+        raise KeyError("Diagnosis or Treatment section is missing.")
+    
+    llm_prompt = open("./llm_prompt_summarize_dt.txt").read()
+    messages = [
+        ("system", llm_prompt),
+        ("human", f"Summarize the following text:\n{dt}\n")
+    ]
+    result = llm.invoke(messages)
+    print(result)
+
+    return result
+
+
+
+HELLO_FUTURE_ME_HERE_ARE_SOME_NOTES = """ \
+Currently the api for annotation does this:
+ - generate labels (annotate_llm)
+ - generate summary (summarize_llm)
+
+This is inefficient because in the future annotate_llm may be upgraded to use multiple mode or swapped to annotate_NER, resulting in two instances of section splitting, which is expensive LLM-token wise. To solve this, we will change the api structure in the future to
+ - generate sections (regex / llm splitter)
+ - generate labels from sections
+ - generate summary from sections
+
+No changes need to be made to the current functions, as they can already accept section input instead of raw text input.
+"""
