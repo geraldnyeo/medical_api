@@ -254,17 +254,12 @@ def summarize_llm(text = None,
     except Exception as e:
         raise KeyError("Diagnosis or Treatment section is missing.")
     
-    print("DT passed")
-    
     llm_prompt = open("./prompts/llm_prompt_summarize_dt.txt").read()
-    print(llm_prompt)
     messages = [
         ("system", llm_prompt),
         ("human", f"Summarize the following text:\n{dt}\n")
     ]
-    print(messages)
     result = llm.invoke(messages)
-    print(result.content)
 
     return result.content
 
