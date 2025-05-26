@@ -129,6 +129,8 @@ def llm_splitter(text):
 
     split_chain = split_prompt_template | llm | JsonOutputParser()
 
+    print("HEASDASLDSALD")
+
     result = split_chain.invoke(text)
     print(result.content)
 
