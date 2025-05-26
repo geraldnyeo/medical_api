@@ -233,22 +233,21 @@ def summarize_llm(text = None,
     -------
     summary: str
     """
-    print("function ran")
     if text == None and sections == None:
        raise ValueError("Either one of 'text' or 'sections' parameters must be set!")
     
-    print("no issues with params")
     llm = ChatDeepSeek(
         model="deepseek-chat",
         # temperature=0,
         max_tokens=None,
         api_key=deepseek_api_key
     )
-    print("llm passed")
+
+    print("before splitting")
 
     if text != None:
         if splitting_mode == "regex":
-            sections = regex_splitter(headers, text, group=True)
+            sections = regex_splitter(text)
             print(sections)
         else:
             raise ValueError("Invalid splitting mode!")
