@@ -281,6 +281,8 @@ def summarize_llm(text = None,
             sections = llm_splitter(text)
         else:
             raise ValueError("Invalid splitting mode!")
+        
+    print(sections)
 
     try:
         dt = sections["D"] + sections["T"]
