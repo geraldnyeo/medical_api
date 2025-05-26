@@ -94,6 +94,38 @@ def regex_splitter(text, headers=headers, group=True):
 
   return sections
 
+# LLM text section splitter
+def llm_splitter(text):
+    """
+    Splits a document into sections based on the headers provided, categorising each section.
+    Note that currently, since the formatting is based on the LLM prompt, headers are pre-determined and sections are always grouped where possible.
+
+    Parameters
+    ----------
+    text: str, text to split
+
+    Returns
+    -------
+    sections: dict, with items of the format
+    section type (str): text (str)
+    """
+    # Initialise LLM
+    llm = ChatDeepSeek(
+        model="deepseek-chat",
+        # temperature=0,
+        max_tokens=None,
+        api_key=deepseek_api_key
+    )
+
+    llm_prompt_split = open("./prompts/llm_prompt_split.txt").read()
+    messages = [
+        ("system", llm_prompt_split),
+        ("human", f"Split the following text: {text}")
+    ]
+    result = llm.invoke(messages)
+    print(result.content)
+
+    return result.content
 
 # Annotate single text using deepseek
 def annotate_llm(text, 
@@ -246,6 +278,9 @@ def summarize_llm(text = None,
     if text != None:
         if splitting_mode == "regex":
             sections = regex_splitter(text)
+        if splitting_mode == "llm":
+            sections = llm_splitter(text)
+            print(sections)
         else:
             raise ValueError("Invalid splitting mode!")
 
