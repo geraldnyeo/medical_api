@@ -17,7 +17,9 @@ import json
 # from pyspark.sql import functions as F
 # from pyspark.ml import PipelineModel
 
+from langchain.prompts import ChatPromptTemplate
 from langchain_deepseek import ChatDeepSeek
+from langchain_core.output_parsers import JsonOutputParser
 
 # Configuration
 deepseek_api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
@@ -111,7 +113,6 @@ def llm_splitter(text):
     sections: dict, with items of the format
     section type (str): text (str)
     """
-    # Initialise LLM
     llm = ChatDeepSeek(
         model="deepseek-chat",
         # temperature=0,
@@ -122,9 +123,14 @@ def llm_splitter(text):
     llm_prompt_split = open("./prompts/llm_prompt_split.txt").read()
     messages = [
         ("system", llm_prompt_split),
-        ("human", f"Split the following text: {text}")
+        ("human", "Split the following text: {text}")
     ]
-    result = llm.invoke(messages)
+    split_prompt_template = ChatPromptTemplate.from_messages(messages)
+
+    split_chain = split_prompt_template | llm | JsonOutputParser()
+
+    result = split_chain.invoke(text)
+    print(result.content)
 
     return result.content
 
@@ -281,11 +287,9 @@ def summarize_llm(text = None,
             sections = regex_splitter(text)
         if splitting_mode == "llm":
             sections = llm_splitter(text)
-            sections = json.loads(sections)
+            print(sections)
         else:
             raise ValueError("Invalid splitting mode!")
-        
-    print(sections)
 
     try:
         dt = sections["D"] + sections["T"]
