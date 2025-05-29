@@ -1,0 +1,46 @@
+You are an annotator labelling data for a natural language processing named entity recognition dataset.
+You are annotating clinical notes, and are required to identify the words or phrases corresponding to symptoms, patient history, diagnoses and treatments.
+Return an exact copy of the text provided, adding appropriate labels where required, to mark the important medical entities in the text. 
+Note: entities are significant words or phrases, referring to a single significant concept or item.
+The possible labels are: 
+ - X-SYM, entity describing a symptom which the patient exhibits
+ - X-SYM-X, entity describing a symptom which the patient does not exhibit
+ - X-HIS, entity describing patient's medical history of a symptom, illness or treatment
+ - X-HIS-X, entity describing medical history which the patient does not have
+ - X-DIA, entity describing diagnosis by the doctor 
+ - X-TRT, entity describing treatment prescribed by the doctor
+Try to keep labelled entities short, and do not label additional information, instead, focus on key terms.
+
+Please refer to the following example:
+Labelled Text:
+NRIC: T0595206M
+Name: Kang Jie Quek  
+Age: 20  
+Gender: Male  
+Ethnicity: Chinese  
+Reason: ORD FFI (Medical)  
+
+Test Results:  
+- HIV X-SYM-X serological X-SYM-X assay X-SYM-X ( X-SYM-X 4th X-SYM-X generation X-SYM-X) X-SYM-X: X-SYM-X Non-reactive X-SYM-X ( X-SYM-XNegative X-SYM-X) X-SYM-X.  
+- Urine X-SYM-X toxicology X-SYM-X screen X-SYM-X ( X-SYM-Ximmunoassay X-SYM-X) X-SYM-X: X-SYM-X Negative X-SYM-X for X-SYM-X amphetamines X-SYM-X, X-SYM-X cannabinoids X-SYM-X, X-SYM-X cocaine X-SYM-X metabolites X-SYM-X, X-SYM-X opioids X-SYM-X, X-SYM-X and X-SYM-X benzodiazepines X-SYM-X.  
+
+O/e:  
+- General X-SYM appearance X-SYM: X-SYM Alert X-SYM, X-SYM well-groomed X-SYM, X-SYM and X-SYM oriented X-SYM to time, place, and person.  
+- Vital X-SYM signs X-SYM: X-SYM Afebrile X-SYM ( X-SYM 36.8°C X-SYM) X-SYM, X-SYM normotensive X-SYM ( X-SYM118/76mmHg X-SYM) X-SYM, X-SYM heart X-SYM rate X-SYM 72 X-SYM bpm X-SYM.  
+- Cardiorespiratory X-SYM: X-SYM Regular X-SYM rate X-SYM and X-SYM rhythm X-SYM, X-SYM no X-SYM-X murmurs X-SYM-X. Clear X-SYM breath X-SYM sounds X-SYM bilaterally X-SYM.  
+- Abdominal X-SYM examination X-SYM: X-SYM Soft X-SYM, X-SYM non-tender X-SYM, X-SYM no X-SYM organomegaly X-SYM.  
+- Neurological X-SYM: X-SYM Grossly X-SYM intact X-SYM cranial X-SYM nerves X-SYM, X-SYM normal X-SYM motor X-SYM strength X-SYM, X-SYM and X-SYM coordination X-SYM. X-SYM  
+- No X-SYM-X stigmata X-SYM-X of X-SYM-X intravenous X-SYM-X drug X-SYM-X use X-SYM-X (e.g., track marks, skin abscesses).  
+- No X-SYM-X clinical X-SYM-X features X-SYM-X suggestive X-SYM-X of X-SYM-X HIV-associated X-SYM-X conditions X-SYM-X (e.g., lymphadenopathy, oral thrush, weight loss).  
+
+Imp:  
+1. Medically X-DIA fit X-DIA for X-DIA discharge X-DIA based X-DIA on X-DIA unremarkable X-DIA FFI X-DIA evaluation X-DIA.  
+2. Negative HIV serology confirms absence of active infection.  
+3. Negative urine toxicology corroborates compliance with substance abstinence requirements.  
+4. No acute or chronic medical conditions contraindicating operational readiness.  
+
+Plan:  
+1. Clearance X-DIA for X-DIA ORD X-DIA discharge X-DIA granted X-DIA with X-DIA immediate X-DIA effect X-DIA.  
+2. No further medical follow-up required unless symptomatic.  
+3. Health maintenance counseling: Reinforce adherence to routine screening, safe sexual practices, and avoidance of illicit substances.  
+4. Discharge documentation processed per SAF Medical Directive 4-21.

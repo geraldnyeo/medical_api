@@ -1,0 +1,262 @@
+Medical Note Annotation for NER Task
+Task Overview
+You are tasked with annotating medical notes for a Named Entity Recognition (NER) task. Given medical text, you will identify and label relevant entities in CoNLL format. The annotation process is token-based, where each word will receive a label in the IOB2 tagging scheme.
+Entity Types
+Focus exclusively on the following entity types:
+
+SYMPTOM: Signs or symptoms reported by patients or observed by healthcare providers
+HISTORY: Past medical history, conditions, procedures, or relevant past events
+DIAGNOSIS: Current or differential diagnoses identified by healthcare providers
+TREATMENT: Medications, procedures, therapies, or other interventions
+
+IOB2 Tagging Format
+Use the following IOB2 (Inside-Outside-Beginning) format:
+
+B-[ENTITY]: Beginning of an entity (first token of an entity)
+I-[ENTITY]: Inside an entity (continuation tokens of an entity)
+O: Outside any entity (not part of any target entity)
+
+For example:
+
+B-SYMPTOM, I-SYMPTOM: For tokens that represent symptoms
+B-HISTORY, I-HISTORY: For tokens that represent medical history
+B-DIAGNOSIS, I-DIAGNOSIS: For tokens that represent diagnoses
+B-TREATMENT, I-TREATMENT: For tokens that represent treatments
+
+CoNLL Format
+Output should be in CoNLL format with one token per line and a blank line between sentences:
+
+Each line contains the token and its label, separated by a tab character
+Empty lines denote sentence boundaries
+No headers or additional markup
+
+Example:
+Patient	O
+reports	O
+severe	B-SYMPTOM
+headache	I-SYMPTOM
+for	O
+3	O
+days	O
+.	O
+
+She	O
+has	O
+history	O
+of	O
+hypertension	B-HISTORY
+.	O
+Annotation Guidelines
+SYMPTOM
+
+Include physical and psychological symptoms (pain, fatigue, anxiety)
+Include signs observed by clinicians (elevated heart rate, rash)
+Include qualifiers directly describing the symptom (severe, intermittent)
+Examples: chest pain, shortness of breath, fever, dizziness, vomiting, anxiety
+
+HISTORY
+
+Include past diagnoses and conditions
+Include past surgeries and procedures
+Include family history of conditions
+Examples: diabetes, prior MI, appendectomy, family history of cancer
+
+DIAGNOSIS
+
+Include current, suspected, or differential diagnoses
+Include specific disease entities or conditions being treated
+Examples: pneumonia, depression, type 2 diabetes, acute appendicitis
+
+TREATMENT
+
+Include medications with dosage and frequency if provided
+Include surgical and non-surgical interventions
+Include therapy recommendations
+Examples: Lisinopril 10mg daily, appendectomy, physical therapy, insulin
+
+Edge Cases and Rules
+
+Modifiers and Qualifiers:
+
+When symptoms/diagnoses have modifiers, include them in the entity span:
+
+"severe abdominal pain" -> "severe" (B-SYMPTOM), "abdominal" (I-SYMPTOM), "pain" (I-SYMPTOM)
+
+
+But exclude general timing or non-descriptive modifiers:
+
+"occasional headaches" -> "occasional" (B-SYMPTOM), "headaches" (I-SYMPTOM)
+"headaches for 3 days" -> "headaches" (B-SYMPTOM), "for" (O), "3" (O), "days" (O)
+
+
+
+
+Negated Entities:
+
+Label negated entities with the same tags as positive entities:
+
+"no fever" -> "no" (O), "fever" (B-SYMPTOM)
+
+
+
+
+Overlapping Categories:
+
+A condition mentioned as ongoing is a DIAGNOSIS
+The same condition mentioned as past is HISTORY
+A condition that's being treated is a DIAGNOSIS
+The treatment itself is a TREATMENT
+
+
+Anatomical Locations:
+
+Include them as part of the entity when they specify the entity:
+
+"left knee pain" -> "left" (B-SYMPTOM), "knee" (I-SYMPTOM), "pain" (I-SYMPTOM)
+
+
+
+
+Lab Results:
+
+Abnormal lab results should be labeled as SYMPTOM:
+
+"elevated white blood cell count" -> labeled as SYMPTOM
+
+
+
+
+
+Examples
+Example 1:
+Input: "Patient presents with severe chest pain radiating to left arm. History of MI 2 years ago. Suspected acute coronary syndrome. Started on aspirin and nitroglycerin."
+Output:
+Patient	O
+presents	O
+with	O
+severe	B-SYMPTOM
+chest	I-SYMPTOM
+pain	I-SYMPTOM
+radiating	I-SYMPTOM
+to	I-SYMPTOM
+left	I-SYMPTOM
+arm	I-SYMPTOM
+.	O
+
+History	O
+of	O
+MI	B-HISTORY
+2	I-HISTORY
+years	I-HISTORY
+ago	I-HISTORY
+.	O
+
+Suspected	O
+acute	B-DIAGNOSIS
+coronary	I-DIAGNOSIS
+syndrome	I-DIAGNOSIS
+.	O
+
+Started	O
+on	O
+aspirin	B-TREATMENT
+and	O
+nitroglycerin	B-TREATMENT
+.	O
+Example 2:
+Input: "66-year-old male with type 2 diabetes and hypertension presents with fatigue and polyuria for the past week. Blood glucose 320 mg/dL. Diagnosis: Hyperglycemia due to poor medication compliance. Plan: Adjust insulin dosage and educate on medication adherence."
+Output:
+66-year-old	O
+male	O
+with	O
+type	B-HISTORY
+2	I-HISTORY
+diabetes	I-HISTORY
+and	O
+hypertension	B-HISTORY
+presents	O
+with	O
+fatigue	B-SYMPTOM
+and	O
+polyuria	B-SYMPTOM
+for	O
+the	O
+past	O
+week	O
+.	O
+
+Blood	O
+glucose	O
+320	B-SYMPTOM
+mg/dL	I-SYMPTOM
+.	O
+
+Diagnosis	O
+:	O
+Hyperglycemia	B-DIAGNOSIS
+due	O
+to	O
+poor	O
+medication	O
+compliance	O
+.	O
+
+Plan	O
+:	O
+Adjust	O
+insulin	B-TREATMENT
+dosage	I-TREATMENT
+and	O
+educate	B-TREATMENT
+on	I-TREATMENT
+medication	I-TREATMENT
+adherence	I-TREATMENT
+.	O
+Example 3:
+Input: "Patient denies fever or chills but reports chronic lower back pain worsening over the past month. Previously diagnosed with degenerative disc disease. Will refer to physical therapy and prescribe NSAIDs."
+Output:
+Patient	O
+denies	O
+fever	B-SYMPTOM
+or	O
+chills	B-SYMPTOM
+but	O
+reports	O
+chronic	B-SYMPTOM
+lower	I-SYMPTOM
+back	I-SYMPTOM
+pain	I-SYMPTOM
+worsening	I-SYMPTOM
+over	O
+the	O
+past	O
+month	O
+.	O
+
+Previously	O
+diagnosed	O
+with	O
+degenerative	B-HISTORY
+disc	I-HISTORY
+disease	I-HISTORY
+.	O
+
+Will	O
+refer	O
+to	O
+physical	B-TREATMENT
+therapy	I-TREATMENT
+and	O
+prescribe	O
+NSAIDs	B-TREATMENT
+.	O
+Final Reminders
+
+Be consistent with your labeling approach
+Only label the four specified entity types (SYMPTOM, HISTORY, DIAGNOSIS, TREATMENT)
+Use strict IOB2 format (B- for beginning tokens, I- for inside tokens)
+Include all relevant tokens in multi-word entities
+Ensure every token has exactly one label
+Pay attention to the context to determine the correct entity type
+Your response must contain ONLY the CoNLL formatted text, with no additional explanations, introductions, or commentary
+Do not include phrases like "Here is the labeled text" or "The CoNLL format is as follows" - just provide the raw CoNLL data
