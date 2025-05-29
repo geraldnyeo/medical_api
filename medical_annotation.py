@@ -10,10 +10,10 @@ import re
 import regex
 from Levenshtein import distance
 
-import sparknlp
-from sparknlp.annotator import NerDLModel
-from pyspark.sql import functions as F
-from pyspark.ml import PipelineModel
+# import sparknlp
+# from sparknlp.annotator import NerDLModel
+# from pyspark.sql import functions as F
+# from pyspark.ml import PipelineModel
 
 from langchain.prompts import ChatPromptTemplate
 from langchain_deepseek import ChatDeepSeek
@@ -22,7 +22,7 @@ from langchain_core.output_parsers import JsonOutputParser
 # Configuration
 deepseek_api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
 
-spark = sparknlp.start()
+# spark = sparknlp.start()
 
 # Substitution for NLTK word tokenize
 def word_tokenize(text):
