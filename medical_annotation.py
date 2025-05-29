@@ -10,10 +10,10 @@ import re
 import regex
 from Levenshtein import distance
 
-# import sparknlp
-# from sparknlp.annotator import NerDLModel
-# from pyspark.sql import functions as F
-# from pyspark.ml import PipelineModel
+import sparknlp
+from sparknlp.annotator import NerDLModel
+from pyspark.sql import functions as F
+from pyspark.ml import PipelineModel
 
 from langchain.prompts import ChatPromptTemplate
 from langchain_deepseek import ChatDeepSeek
@@ -22,7 +22,7 @@ from langchain_core.output_parsers import JsonOutputParser
 # Configuration
 deepseek_api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
 
-# spark = sparknlp.start()
+spark = sparknlp.start()
 
 # Substitution for NLTK word tokenize
 def word_tokenize(text):
@@ -128,9 +128,8 @@ def llm_splitter(text):
     split_chain = split_prompt_template | llm | JsonOutputParser()
 
     result = split_chain.invoke({"text": text})
-    print(result)
 
-    return result.content
+    return result
 
 # Annotate single text using deepseek
 def annotate_llm(text, 
@@ -236,8 +235,10 @@ def annotate_llm(text,
         return tokens, labels
 
 # Annotate single text using NER model
-def annotate_ner():
+def annotate_ner(text):
     pass
+    # print(text)
+
     # pipe_path = "./models/ner_pipe"
     # ner_pipe = PipelineModel.load(pipe_path)
 
@@ -268,6 +269,7 @@ def summarize_llm(text = None,
     
     Returns
     -------
+    category: str
     summary: str
     """
     if text == None and sections == None:
@@ -278,18 +280,13 @@ def summarize_llm(text = None,
             sections = regex_splitter(text)
         elif splitting_mode == "llm":
             sections = llm_splitter(text)
-            print(sections)
         else:
             raise ValueError("Invalid splitting mode!")
-
-    print(sections)
 
     try:
         dt = sections["D"] + sections["T"]
     except Exception as e:
         raise KeyError("Diagnosis or Treatment section is missing.")
-    
-    print(dt)
 
     llm = ChatDeepSeek(
         model="deepseek-chat",
@@ -305,9 +302,10 @@ def summarize_llm(text = None,
     ]
     result = llm.invoke(messages)
 
-    print(result)
+    category = re.search(r'Category: (.+)\n', result.content).group(1)
+    category = category.strip()
 
-    return result.content
+    return category, result.content
 
 
 
