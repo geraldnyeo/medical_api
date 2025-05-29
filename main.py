@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from pymongo import MongoClient
 
-from medical_annotation import annotate_llm, summarize_llm
+from medical_annotation import annotate_llm, annotate_ner, summarize_llm
 
 # Connect to MongoDB
 MONGO_PASSWORD = "m8pWxZ4g5W7p7Edd"
@@ -191,8 +191,9 @@ def upload_clinical_record(record: Record):
     
     # summarize text
     try:
-        summary = summarize_llm(text = record_dict["rawText"],
-                                splitting_mode = "regex")
+        category, summary = summarize_llm(text = record_dict["rawText"], 
+                                          splitting_mode = "llm")
+        record_dict["category"] = category
         record_dict["summary"] = summary
     except Exception as e:
         raise HTTPException(status_code=500, detail="Unable to generate summary.")
@@ -214,6 +215,12 @@ def delete_clinical_record(recordID: int):
         raise HTTPException(status_code=500, detail="Failed to delete clinical record.")
     
     return "Clinical record deleted"
+
+@app.get("/testing", status_code=status.HTTP_200_OK)
+def test_ner():
+    annotate_ner("hello")
+
+    return "completed"
     
 
 if __name__ == "__main__":
