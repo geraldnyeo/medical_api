@@ -140,6 +140,7 @@ def update_patient_record(patientID: str, patient: Patient):
 class Record(BaseModel):
     patientID: str
     date: str
+    medicalCentre: str
     reason: str
     text: str
     parentID: int | None = None
@@ -192,7 +193,7 @@ def upload_clinical_record(record: Record):
     # summarize text
     try:
         category, summary = summarize_llm(text = record_dict["rawText"], 
-                                          splitting_mode = "llm")
+                                          splitting_mode = "regex")
         record_dict["category"] = category
         record_dict["summary"] = summary
     except Exception as e:
