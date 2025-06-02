@@ -236,8 +236,7 @@ def annotate_llm(text,
 
 # Annotate single text using NER model
 def annotate_ner(text):
-    pass
-    # print(text)
+    print(text)
 
     # pipe_path = "./models/ner_pipe"
     # ner_pipe = PipelineModel.load(pipe_path)
