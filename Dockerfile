@@ -13,7 +13,7 @@ RUN apt-get -y update \
     
 ENV PYSPARK_DRIVER_PYTHON=python3
 ENV PYSPARK_PYTHON=python3
-ENV PYSPARK_SUBMIT_ARGS="--master local[3] pyspark-shell"
+ENV PYSPARK_SUBMIT_ARGS="--master local[2] pyspark-shell"
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
