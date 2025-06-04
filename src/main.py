@@ -217,6 +217,27 @@ def delete_clinical_record(recordID: int):
     
     return "Clinical record deleted"
 
+
+@app.get("/findRecord", status_code=status.HTTP_200_OK)
+def find_clinical_record(
+    medicalCentre: str | None = None):
+    """
+    Finds all clinical records corresponding to a certain filter
+    """
+    if medicalCentre != None:
+        try:
+            clinical_notes = db["clinical_records"].find({
+                "medicalCentre": medicalCentre
+            })
+            clinical_notes = [{k: v for k, v in entry.items() if k != "_id"} for entry in clinical_notes]
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Unable to fetch data from database.")
+    else:
+        raise HTTPException(status_code=404, detail="No criteria selected.")
+
+    return clinical_notes
+
+
 @app.get("/testing", status_code=status.HTTP_200_OK)
 def test_ner():
     annotate_ner("hello")
