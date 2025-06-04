@@ -174,15 +174,19 @@ def upload_clinical_record(record: Record):
             "PES Review (Downgrade)": "pes_downgrade",
             "Report Sick": "sick"
         }
-        # TODO: FIX THIS
-        # if record_dict["reason"] in annotation_modes.keys():
-        #     annotation_mode = annotation_modes[record_dict["reason"]]
-        # else:
-        #     annotation_mode = "append"
-        annotation_mode = "append"
+        
+        if record_dict["reason"] in annotation_modes.keys():
+            annotation_mode = annotation_modes[record_dict["reason"]]
+        else:
+            annotation_mode = "append"
 
-        tokens, labels = annotate_llm(record_dict["rawText"],
-                                      mode = annotation_mode)
+        # tokens, labels = annotate_llm(record_dict["rawText"],
+        #                               mode = annotation_mode)
+
+        tokens, labels = annotate_ner(mode = annotation_mode, 
+                                      text = record_dict["rawText"],
+                                      splitting_mode = "regex")
+        
         record_dict["data"] = {
             "tokens": tokens,
             "labels": labels
@@ -220,14 +224,20 @@ def delete_clinical_record(recordID: int):
 
 @app.get("/findRecord", status_code=status.HTTP_200_OK)
 def find_clinical_record(
-    medicalCentre: str | None = None):
+    medicalCentre: str | None = None,
+    category: str | None = None):
     """
     Finds all clinical records corresponding to a certain filter
     """
+    a = {
+        **locals()
+    }
+    print(a)
+
     if medicalCentre != None:
         try:
             clinical_notes = db["clinical_records"].find({
-                "medicalCentre": medicalCentre
+                **locals()
             })
             clinical_notes = [{k: v for k, v in entry.items() if k != "_id"} for entry in clinical_notes]
         except Exception as e:
@@ -240,7 +250,7 @@ def find_clinical_record(
 
 @app.get("/testing", status_code=status.HTTP_200_OK)
 def test_ner():
-    annotate_ner("hello")
+    annotate_ner("Name: Kai Ming Tan\nAge: 60\nGender: Male\nEthnicity: Chinese\nReason: Report Sick\nHOPCt:\nThe patient reports acute onset of left ankle pain and functional limitation following a torsional injury sustained during a shipboard drill 24 hours prior. He describes localized pain exacerbated by weight-bearing activities, particularly dorsiflexion and external rotation of the ankle. Symptoms include progressive edema and difficulty ambulating without assistance. Denies prior history of ankle trauma or instability. Reports intermittent paraesthesia over the dorsum of the foot but no frank numbness or vascular compromise.\n\nO/e:\n- Inspection: Moderate edema and ecchymosis over the anterolateral aspect of the left ankle, consistent with traumatic soft tissue injury. Antalgic gait observed.\n- Palpation: Tenderness localized to the distal tibiofibular syndesmosis, with no crepitus or bony irregularities. Negative posterior malleolar tenderness.\n- Range of Motion: Pain-limited dorsiflexion (reduced to 5° vs. 15° on contralateral side) and plantarflexion (30° vs. 40°). Passive external rotation elicits sharp pain at the syndesmosis.\n- Special Tests: Negative anterior drawer test (no talar shift), negative squeeze test (no syndesmotic widening), and stable Mortise joint on stress examination.\n- Neurovascular: Distal pulses palpable, capillary refill <2 seconds, no motor deficits.\n\nImpression:\nAcute Grade II Sprain of the Distal Tibiofibular Ligament (Syndesmotic Injury), Left Ankle\n- Mechanism consistent with forced external rotation and dorsiflexion.\n- Clinical stability preserved, indicating partial ligamentous tear without diastasis.\n\nPlan:\n1. Acute Management:\n- RICE Protocol: Rest, ice application (15–20 minutes q4h), compression bandage, and elevation to mitigate edema.\n- Pharmacotherapy: Oral NSAIDs (Celecoxib 200 mg BD for 5 days) for analgesia and anti-inflammatory effect.\n- Immobilization: Ankle brace with lateral stabilization to limit syndesmotic stress during ambulation.\n\n2. Medical Leave:\n- Medical Certificate (MC): 7 days to facilitate reduced weight-bearing and tissue healing.\n- Light Duty (LD): 14 days post-MC, restricting prolonged standing, ladder climbing, and heavy lifting.\n\n3. Investigations:\n- X-ray left ankle (AP/lateral/mortise views) ordered to exclude occult malleolar fracture or syndesmotic diastasis.\n\n4. Rehabilitation:\n- Referral to physiotherapy for progressive proprioceptive training, peroneal strengthening, and gait normalization after acute phase.\n\nFollow-up:\n- Re-evaluate in 7 days for reassessment of edema, pain severity, and functional capacity.\n- If persistent instability or pain >4/10 VAS, consider MRI to assess ligament integrity and orthopedic consultation.\n- Advise strict adherence to brace use during duty and gradual return to activity guided by physiotherapy.\n- Educate on signs of compartment syndrome (e.g., escalating pain, pallor) requiring urgent review.\n\n---\nNote: PES status remains unchanged. Prognosis favorable with compliance to rehabilitation.")
 
     return "completed"
     

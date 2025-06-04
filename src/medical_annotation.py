@@ -10,10 +10,12 @@ import re
 import regex
 from Levenshtein import distance
 
-# import sparknlp
-# from sparknlp.annotator import NerDLModel
-# from pyspark.sql import functions as F
-# from pyspark.ml import PipelineModel
+import pandas as pd
+
+import sparknlp
+from sparknlp.annotator import NerDLModel
+from pyspark.sql import functions as F
+from pyspark.ml import PipelineModel
 
 from langchain.prompts import ChatPromptTemplate
 from langchain_deepseek import ChatDeepSeek
@@ -22,7 +24,7 @@ from langchain_core.output_parsers import JsonOutputParser
 # Configuration
 deepseek_api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
 
-# spark = sparknlp.start()
+spark = sparknlp.start(gpu=False)
 
 # Substitution for NLTK word tokenize
 def word_tokenize(text):
@@ -140,7 +142,7 @@ def annotate_llm(text,
     Parameters
     ----------
     text: str
-    reason: (str) reason for visit, to select correct LLM prompt for annotation
+    mode: (str) reason for visit, to select correct LLM prompt for annotation
 
     Returns
     -------
@@ -206,8 +208,10 @@ def annotate_llm(text,
         return tokens, labels
     
     else:
+        print(mode)
         # Invoke LLM
         llm_prompt = open(f"./prompts/llm_prompt_{mode}.txt").read()
+        print(llm_prompt)
         messages = [
             ("system", llm_prompt),
             ("human", f"Unlabelled Text:\n{text}\nLabelled Text:\n")
@@ -235,17 +239,80 @@ def annotate_llm(text,
         return tokens, labels
 
 # Annotate single text using NER model
-def annotate_ner(text):
-    print(text)
+def annotate_ner(mode,
+                 text = None,
+                 sections = None,
+                 splitting_mode = "regex"):
+    """
+    Annotate a single medical note using NER models
 
-    # pipe_path = "./models/ner_pipe"
-    # ner_pipe = PipelineModel.load(pipe_path)
+    Parameters
+    ----------
+    mode: (str) reason for visit, to select correct LLM prompt for annotation
+    text: (str) raw text of entire clinical note
+        must be set if parameter "sections" is None
+    sections: (dict) pre-split sections of clinical note, in the format:
+        { section_type: text }
+        must contain at least diagnosis (D) and treatment (T) sections
+        must be set if parameter "text" is None
+    splitting_mode: (str): (str) "regex" or "llm", determines whether to use regex or LLM for splitting text
+        regex by default
 
-    # SYM_model_path = "./models/ner_SYM_dental_52"
-    # SYM_model = NerDLModel.load(SYM_model_path)
+    Returns
+    -------
+    tokens: list
+    labels: list
+    """
+    if text == None and sections == None:
+       raise ValueError("Either one of 'text' or 'sections' parameters must be set!")
+    
+    if text != None:
+        if splitting_mode == "regex":
+            sections = regex_splitter(text)
+        elif splitting_mode == "llm":
+            sections = llm_splitter(text)
+        else:
+            raise ValueError("Invalid splitting mode!")
 
-    # print(ner_pipe)
-    # print(SYM_model)
+    pipe_path = "./models/ner_pipe"
+    ner_pipe = PipelineModel.load(pipe_path)
+
+    SYM_models = {
+        "ffi_dental": "./models/ner_SYM_dental_52"
+    }
+    SYM_model_path = SYM_models[mode]
+    SYM_model = NerDLModel.load(SYM_model_path)
+    
+    section_annotators = {
+        "C": SYM_model,
+        "F": SYM_model
+    }
+
+    tokens, labels = [], []
+    for section_type, text in sections.items():
+        if section_type not in section_annotators.keys():
+            t = word_tokenize(text)
+            l = ["O"] * len(t)
+        else:
+            text_spark_df = spark.createDataFrame([[text]]).toDF("text")
+
+            print("hello")
+
+            preprocessed = ner_pipe.transform(text_spark_df)
+            result = section_annotators[section_type].transform(preprocessed)
+            print("Result:", result)
+
+            print(result.show())
+
+            preds_df = result.toPandas()
+            preds_df["label"] = preds_df["label"].fillna("O")
+
+            break
+
+        tokens.extend(t)
+        labels.extend(l)
+
+    return [], []
 
 # Summarize single text using deepseek
 def summarize_llm(text = None,
