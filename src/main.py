@@ -185,8 +185,8 @@ def upload_clinical_record(record: Record):
 
         tokens, labels = annotate_ner(mode = annotation_mode, 
                                       text = record_dict["rawText"],
-                                      splitting_mode = "regex")
-        
+                                      splitting_mode = "regex") 
+               
         record_dict["data"] = {
             "tokens": tokens,
             "labels": labels

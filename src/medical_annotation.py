@@ -296,23 +296,19 @@ def annotate_ner(mode,
         else:
             text_spark_df = spark.createDataFrame([[text]]).toDF("text")
 
-            print("hello")
-
             preprocessed = ner_pipe.transform(text_spark_df)
             result = section_annotators[section_type].transform(preprocessed)
-            print("Result:", result)
 
-            print(result.show())
+            # result.show()
 
-            preds_df = result.toPandas()
-            preds_df["label"] = preds_df["label"].fillna("O")
-
-            break
+            ner_result = result.select("ner").first().ner
+            t = [r.metadata['word'] for r in ner_result]
+            l = [r.result for r in ner_result]
 
         tokens.extend(t)
         labels.extend(l)
 
-    return [], []
+    return tokens, labels
 
 # Summarize single text using deepseek
 def summarize_llm(text = None,
