@@ -282,10 +282,24 @@ def annotate_ner(mode,
     }
     SYM_model_path = SYM_models[mode]
     SYM_model = NerDLModel.load(SYM_model_path)
+
+    DIA_models = {
+        "ffi_dental": "./models/ner_DIA_dental_52"
+    }
+    DIA_model_path = DIA_models[mode]
+    DIA_model = NerDLModel.load(DIA_model_path)
+
+    TRT_models = {
+        "ffi_dental": "./models/ner_TRT_dental_52"
+    }
+    TRT_model_path = TRT_models[mode]
+    TRT_model = NerDLModel.load(TRT_model_path)
     
     section_annotators = {
         "C": SYM_model,
-        "F": SYM_model
+        "F": SYM_model,
+        "D": DIA_model,
+        "T": TRT_model
     }
 
     tokens, labels = [], []
@@ -298,7 +312,6 @@ def annotate_ner(mode,
 
             preprocessed = ner_pipe.transform(text_spark_df)
             result = section_annotators[section_type].transform(preprocessed)
-
             # result.show()
 
             ner_result = result.select("ner").first().ner
