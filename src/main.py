@@ -205,8 +205,6 @@ def upload_clinical_record(record: Record):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Unable to generate summary.")
     
-    return
-    
     try:
         db["clinical_records"].insert_one(record_dict)
     except Exception as e:
@@ -233,15 +231,12 @@ def find_clinical_record(
     """
     Finds all clinical records corresponding to a certain filter
     """
-    a = {
-        **locals()
-    }
-    print(a)
+    filters = {k: v for k, v in locals().items() if v != None}
 
-    if medicalCentre != None:
+    if len(filters.keys()) != 0:
         try:
             clinical_notes = db["clinical_records"].find({
-                **locals()
+                **filters
             })
             clinical_notes = [{k: v for k, v in entry.items() if k != "_id"} for entry in clinical_notes]
         except Exception as e:
