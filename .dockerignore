@@ -1,6 +1,7 @@
 # Python
 __pycache__
 env
+src/__pycache__
 
 # Git
 .git

@@ -1,3 +1,5 @@
 # python
-__pycache__
 env
+src/__pycache__
+src/models
+src/.env

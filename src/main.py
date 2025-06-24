@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+import os
+
 import uvicorn
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,11 +10,13 @@ from pymongo import MongoClient
 
 from medical_annotation import annotate_llm, annotate_ner, summarize_llm
 
+# Environment Variables
+load_dotenv()
+
 # Connect to MongoDB
-MONGO_PASSWORD = "m8pWxZ4g5W7p7Edd"
-DATABASE_NAME = "patient_records"
-uri = f"mongodb+srv://geraldnyeo:{MONGO_PASSWORD}@medical-notes-analysis.nziqawg.mongodb.net/?retryWrites=true&w=majority&appName=Medical-Notes-Analysis"
-client= MongoClient(uri)
+DATABASE_NAME = os.getenv("DATABASE_NAME")
+MONGODB_URI = os.getenv("MONGODB_URI")
+client= MongoClient(MONGODB_URI)
 db = client[DATABASE_NAME]
 
 # FastAPI
@@ -180,12 +185,18 @@ def upload_clinical_record(record: Record):
         else:
             annotation_mode = "append"
 
+        # UNCOMMENT THIS IF YOU WANT TO LABEL USING LLMS
+        # LLM ENTITTY EXTRACTION
         # tokens, labels = annotate_llm(record_dict["rawText"],
         #                               mode = annotation_mode)
+        # END OF LLM ENTITY EXTRACTION
 
+        # REMOVE THIS IF YOU WANT TO DO ENTITY EXTRACTION USING LLMS
+        # NER ENTITY EXTRACTION
         tokens, labels = annotate_ner(mode = annotation_mode, 
                                       text = record_dict["rawText"],
                                       splitting_mode = "regex") 
+        # END OF NER ENTITY EXTRACTION
         
         for t, l in zip(tokens, labels): print(f"{t:20} {l}")
                

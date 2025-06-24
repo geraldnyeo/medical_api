@@ -1,0 +1,11 @@
+{
+    "patientID": "T0123456A",
+    "name": "John Lee",
+    "age": 20,
+    "gender": "Male",
+    "ethnicity": "Chinese",
+    "serviceType": "NSF",
+    "rank": "3SG",
+    "pes": "A",
+    "vocation": "Armoured Infantry"
+}

@@ -6,6 +6,8 @@ This module has two possible methods for annotating medical notes:
  - Using a trained NER model to label medical notes.
 """
 # Imports
+import os
+
 import re
 import regex
 from Levenshtein import distance
@@ -22,7 +24,7 @@ from langchain_deepseek import ChatDeepSeek
 from langchain_core.output_parsers import JsonOutputParser
 
 # Configuration
-deepseek_api_key = "sk-9edb6eb971074472814d05f87c9c3d59"
+deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
 
 spark = sparknlp.start(gpu=False)
 
@@ -274,23 +276,39 @@ def annotate_ner(mode,
         else:
             raise ValueError("Invalid splitting mode!")
 
+    # MODIFY FILE PATH FOR DOWNLOADED MODEL
     pipe_path = "./models/ner_pipe"
     ner_pipe = PipelineModel.load(pipe_path)
 
+    # MODIFY FILE PATHS FOR DOWNLOADED MODELS
     SYM_models = {
-        "ffi_dental": "./models/ner_SYM_dental_52"
+        "ffi_dental": "./models/ner_SYM_dental_52",
+        "ffi_medical": "./models/ner_SYM_medical_58",
+        "pes_downgrade": "./models/ner_SYM_downgrade_17",
+        "pes_upgrade": "./models/ner_SYM_upgrade_50",
+        "sick": "./models/ner_SYM_sick_50"
     }
     SYM_model_path = SYM_models[mode]
     SYM_model = NerDLModel.load(SYM_model_path)
 
+    # MODIFY FILE PATHS FOR DOWNLOADED MODELS
     DIA_models = {
-        "ffi_dental": "./models/ner_DIA_dental_52"
+        "ffi_dental": "./models/ner_DIA_dental_52",
+        "ffi_medical": "./models/ner_DIA_medical_58",
+        "pes_downgrade": "./models/ner_DIA_downgrade_50",
+        "pes_upgrade": "./models/ner_DIA_upgrade_50",
+        "sick": "./models/ner_DIA_sick_50"
     }
     DIA_model_path = DIA_models[mode]
     DIA_model = NerDLModel.load(DIA_model_path)
 
+    # MODIFY FILE PATHS FOR DOWNLOADED MODELS
     TRT_models = {
-        "ffi_dental": "./models/ner_TRT_dental_52"
+        "ffi_dental": "./models/ner_TRT_dental_52",
+        "ffi_medical": "./models/ner_TRT_medical_58",
+        "pes_downgrade": "./models/ner_TRT_downgrade_30",
+        "pes_upgrade": "./models/ner_TRT_upgrade_50",
+        "sick": "./models/ner_TRT_sick_50"
     }
     TRT_model_path = TRT_models[mode]
     TRT_model = NerDLModel.load(TRT_model_path)
